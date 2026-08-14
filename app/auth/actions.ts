@@ -61,6 +61,8 @@ export async function signUpAction(_state: ActionState, formData: FormData): Pro
     return { status: "error", message: pwdCheck.reason || "Use at least 8 characters for your password." };
   }
 
+  let shouldRedirect = false;
+
   try {
     const supabase = await createClient();
     const origin = await getOrigin();
@@ -82,16 +84,20 @@ export async function signUpAction(_state: ActionState, formData: FormData): Pro
     }
 
     if (data.session) {
-      redirect(next);
+      shouldRedirect = true;
     }
-
-    return {
-      status: "success",
-      message: "Account created. Check your email to confirm your Yume Nurse sign in.",
-    };
   } catch (err) {
     return { status: "error", message: sanitizeClientError(err) };
   }
+
+  if (shouldRedirect) {
+    redirect(next);
+  }
+
+  return {
+    status: "success",
+    message: "Account created. Check your email to confirm your Yume Nurse sign in.",
+  };
 }
 
 export async function loginAction(_state: ActionState, formData: FormData): Promise<ActionState> {
@@ -118,11 +124,11 @@ export async function loginAction(_state: ActionState, formData: FormData): Prom
     if (data.user) {
       await ensureProfile(data.user);
     }
-
-    redirect(next);
   } catch (err) {
     return { status: "error", message: sanitizeClientError(err) };
   }
+
+  redirect(next);
 }
 
 export async function logoutAction() {
@@ -195,11 +201,11 @@ export async function resetPasswordAction(_state: ActionState, formData: FormDat
     if (error) {
       return { status: "error", message: sanitizeClientError(error) };
     }
-
-    redirect("/profile?message=password-updated");
   } catch (err) {
     return { status: "error", message: sanitizeClientError(err) };
   }
+
+  redirect("/profile?message=password-updated");
 }
 
 export async function updateProfileAction(_state: ActionState, formData: FormData): Promise<ActionState> {
