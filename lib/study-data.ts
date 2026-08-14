@@ -1433,6 +1433,132 @@ export const quizQuestions: QuizQuestion[] = [
     tags: ["Bipolar Mania", "Nutrition", "Finger Foods"],
     source: "Open RN Mental Health and Community Concepts",
   },
+  {
+    id: "q-cardio-mi-ecg",
+    subjectId: "med-surg",
+    topicId: "cardiovascular-system",
+    type: "Multiple Choice",
+    prompt: "A 58-year-old client presents to the emergency department with crushing substernal chest pain radiating to the left arm and jaw. An ECG reveals ST-segment elevation in leads II, III, and aVF. Which coronary artery is most likely occluded?",
+    options: [
+      "Right Coronary Artery (RCA) - Inferior Wall MI",
+      "Left Anterior Descending (LAD) - Anterior Wall MI",
+      "Left Circumflex Artery (LCx) - Lateral Wall MI",
+      "Left Main Coronary Artery"
+    ],
+    correctAnswer: "Right Coronary Artery (RCA) - Inferior Wall MI",
+    explanation: "Leads II, III, and aVF look at the inferior wall of the left ventricle, which is supplied by the Right Coronary Artery (RCA) in 85-90% of individuals.",
+    difficulty: "Hard",
+    tags: ["ECG", "STEMI", "Myocardial Infarction", "Cardiology"],
+    source: "NCLEX-RN Cardiology Core Curriculum",
+  },
+  {
+    id: "q-endocrine-dka-priority",
+    subjectId: "med-surg",
+    topicId: "endocrine-system",
+    type: "Multiple Choice",
+    prompt: "A 19-year-old with Type 1 Diabetes arrives with blood glucose 580 mg/dL, arterial pH 7.18, and deep, rapid Kussmaul breathing. What is the initial priority nursing intervention?",
+    options: [
+      "Administer rapid intravenous normal saline (0.9% NaCl) fluid resuscitation",
+      "Administer an IV bolus of subcutaneous NPH insulin",
+      "Administer sodium bicarbonate orally",
+      "Give potassium chloride IV push"
+    ],
+    correctAnswer: "Administer rapid intravenous normal saline (0.9% NaCl) fluid resuscitation",
+    explanation: "In Diabetic Ketoacidosis (DKA), severe dehydration from osmotic diuresis is life-threatening. Fluid resuscitation with isotonic saline (0.9% NaCl) takes immediate precedence to restore circulating volume before insulin infusion.",
+    difficulty: "Hard",
+    tags: ["DKA", "Type 1 Diabetes", "Fluid Resuscitation", "Priority"],
+    source: "NCLEX-RN Endocrine Clinical Review",
+  },
+  {
+    id: "q-peds-croup-epiglottitis",
+    subjectId: "maternal-child",
+    topicId: "pediatric-milestones",
+    type: "Multiple Choice",
+    prompt: "A 3-year-old child presents with high fever, tripod sitting posture, drooling, and inspiratory stridor. What action by the triage nurse is CONTRAINDICATED?",
+    options: [
+      "Inspecting the child's throat with a tongue depressor",
+      "Allowing the parent to hold the child in a position of comfort",
+      "Preparing equipment for emergency endotracheal intubation",
+      "Administering humidified oxygen"
+    ],
+    correctAnswer: "Inspecting the child's throat with a tongue depressor",
+    explanation: "Drooling, dysphagia, dysphonia, and distress in a tripod position indicate Acute Epiglottitis. Never insert a tongue blade or throat swab, as stimulation can trigger complete laryngospasm and airway obstruction.",
+    difficulty: "Hard",
+    tags: ["Epiglottitis", "Pediatrics", "Airway Safety", "Emergency"],
+    source: "NCLEX-RN Pediatric Safety Standards",
+  },
+  {
+    id: "q-ob-magnesium-sulfate-toxicity",
+    subjectId: "maternal-child",
+    topicId: "stages-of-labor",
+    type: "Multiple Choice",
+    prompt: "A pregnant client with severe preeclampsia is receiving an IV infusion of Magnesium Sulfate. Which clinical finding signals magnesium toxicity and requires immediate cessation of the infusion?",
+    options: [
+      "Loss of Deep Tendon Reflexes (0+ DTR) and respiratory rate of 10 breaths/min",
+      "Serum magnesium level of 5.5 mg/dL",
+      "Blood pressure decrease from 160/100 to 138/88 mmHg",
+      "Urine output of 45 mL/hour"
+    ],
+    correctAnswer: "Loss of Deep Tendon Reflexes (0+ DTR) and respiratory rate of 10 breaths/min",
+    explanation: "Magnesium toxicity causes central nervous system depression: loss of patellar reflexes (DTRs), respiratory depression (<12/min), and oliguria. Calcium gluconate is the immediate IV antidote.",
+    difficulty: "Hard",
+    tags: ["Preeclampsia", "Magnesium Sulfate", "Antidote", "Obstetrics"],
+    source: "NCLEX-RN Maternal-Newborn Protocols",
+  },
+  {
+    id: "q-pharma-digoxin-toxicity",
+    subjectId: "pharmacology",
+    topicId: "drug-calculations",
+    type: "Multiple Choice",
+    prompt: "An elderly client taking Digoxin 0.25 mg daily reports nausea, anorexia, and seeing yellow-green halos around lights. What electrolyte imbalance markedly increases the risk of this toxicity?",
+    options: [
+      "Hypokalemia (low serum potassium)",
+      "Hyperkalemia (high serum potassium)",
+      "Hypernatremia (high serum sodium)",
+      "Hypocalcemia (low serum calcium)"
+    ],
+    correctAnswer: "Hypokalemia (low serum potassium)",
+    explanation: "Hypokalemia enhances digoxin binding to myocardial Na+/K+ ATPase pumps, greatly intensifying toxicity risks (visual halos, bradycardia, dysrhythmias).",
+    difficulty: "Medium",
+    tags: ["Digoxin", "Hypokalemia", "Toxicity", "Cardiac Meds"],
+    source: "Open RN Pharmacology 2nd Edition",
+  },
+  {
+    id: "q-chn-expanded-garbology",
+    subjectId: "community-health-ph",
+    topicId: "phc-principles",
+    type: "Multiple Choice",
+    prompt: "Under the Philippine Department of Health (DOH) Community Organizing Participatory Action Research (COPAR), what is considered the primary ultimate goal of the community health nurse?",
+    options: [
+      "Community self-reliance, empowerment, and active participation in solving health problems",
+      "Distributing free prescription medications during all medical missions",
+      "Replacing the local Rural Health Physician during administrative leave",
+      "Building tertiary diagnostic hospitals in every rural barangay"
+    ],
+    correctAnswer: "Community self-reliance, empowerment, and active participation in solving health problems",
+    explanation: "COPAR is a social development process that aims to transform passive community members into empowered, self-reliant partners capable of mobilizing their own resources to solve community health problems.",
+    difficulty: "Medium",
+    tags: ["COPAR", "DOH", "Public Health Nursing", "Self-Reliance"],
+    source: "Araceli S. Maglaya CHN Philippine Standards",
+  },
+  {
+    id: "q-fundamentals-race-pass",
+    subjectId: "fundamentals",
+    topicId: "infection-control",
+    type: "Multiple Choice",
+    prompt: "A hospital unit fire alarm sounds after smoke is noticed in a patient's room. Following the RACE protocol, what is the nurse's first and most critical action?",
+    options: [
+      "Rescue and remove all patients and personnel in immediate danger",
+      "Activate the manual pull station alarm and call the operator",
+      "Confine the fire by closing all doors and windows",
+      "Extinguish the flames using the nearest Class ABC fire extinguisher"
+    ],
+    correctAnswer: "Rescue and remove all patients and personnel in immediate danger",
+    explanation: "RACE sequence: R = Rescue anyone in immediate danger; A = Activate alarm; C = Confine fire (close doors); E = Extinguish/Evacuate.",
+    difficulty: "Easy",
+    tags: ["RACE", "Hospital Safety", "Fire Protocol"],
+    source: "Open RN Nursing Fundamentals 2nd Edition",
+  }
 ];
 
 export function getSubject(subjectId: string) {
