@@ -35,17 +35,17 @@ export type GamificationState = {
   unlockedAchievements: string[];
 };
 
-const STORAGE_KEY_GAMIFICATION = "nursemate_gamification_v1";
+const STORAGE_KEY_GAMIFICATION = "yumenurse_gamification_v2";
 
 const DEFAULT_STATE: GamificationState = {
-  totalXp: 450,
-  currentStreak: 4,
-  longestStreak: 7,
+  totalXp: 0,
+  currentStreak: 1,
+  longestStreak: 1,
   lastStudyDate: new Date().toISOString().split("T")[0],
-  totalStudyMinutes: 455, // ~7.5 hours
-  totalCardsReviewed: 38,
-  totalQuestionsAnswered: 42,
-  unlockedAchievements: ["first_quiz", "cards_10", "study_1h"],
+  totalStudyMinutes: 0,
+  totalCardsReviewed: 0,
+  totalQuestionsAnswered: 0,
+  unlockedAchievements: [],
 };
 
 export function loadGamification(): GamificationState {
@@ -67,137 +67,172 @@ export function saveGamification(state: GamificationState): void {
   }
 }
 
-export function getCurrentLevel(xp: number): { current: NursingLevel; next?: NursingLevel; progressPercent: number } {
+export function addXp(amount: number, reason: string): GamificationState {
+  const current = loadGamification();
+  const updated = {
+    ...current,
+    totalXp: current.totalXp + amount,
+  };
+  saveGamification(updated);
+  return updated;
+}
+
+export function recordStudySession(minutes: number): GamificationState {
+  const current = loadGamification();
+  const today = new Date().toISOString().split("T")[0];
+  
+  let newStreak = current.currentStreak;
+  if (current.lastStudyDate !== today) {
+    const lastDate = new Date(current.lastStudyDate);
+    const currentDate = new Date(today);
+    const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) {
+      newStreak += 1;
+    } else if (diffDays > 1) {
+      newStreak = 1;
+    }
+  }
+
+  const updated: GamificationState = {
+    ...current,
+    totalStudyMinutes: current.totalStudyMinutes + minutes,
+    totalXp: current.totalXp + Math.round(minutes * 2), // 2 XP per focused study minute
+    currentStreak: newStreak,
+    longestStreak: Math.max(current.longestStreak, newStreak),
+    lastStudyDate: today,
+  };
+
+  saveGamification(updated);
+  return updated;
+}
+
+export function recordQuizCompletion(scorePercent: number, questionCount: number): GamificationState {
+  const current = loadGamification();
+  const earnedXp = Math.round(questionCount * 10 * (scorePercent / 100)); // up to 10 XP per question
+  
+  const achievements = [...current.unlockedAchievements];
+  if (!achievements.includes("first_quiz")) achievements.push("first_quiz");
+  if (scorePercent === 100 && !achievements.includes("perfect_quiz")) achievements.push("perfect_quiz");
+  if (current.totalQuestionsAnswered + questionCount >= 50 && !achievements.includes("questions_50")) {
+    achievements.push("questions_50");
+  }
+
+  const updated: GamificationState = {
+    ...current,
+    totalQuestionsAnswered: current.totalQuestionsAnswered + questionCount,
+    totalXp: current.totalXp + earnedXp,
+    unlockedAchievements: achievements,
+  };
+
+  saveGamification(updated);
+  return updated;
+}
+
+export function recordFlashcardReviewed(): GamificationState {
+  const current = loadGamification();
+  const achievements = [...current.unlockedAchievements];
+  const newCount = current.totalCardsReviewed + 1;
+
+  if (newCount >= 10 && !achievements.includes("cards_10")) achievements.push("cards_10");
+  if (newCount >= 50 && !achievements.includes("cards_50")) achievements.push("cards_50");
+
+  const updated: GamificationState = {
+    ...current,
+    totalCardsReviewed: newCount,
+    totalXp: current.totalXp + 5, // 5 XP per flashcard
+    unlockedAchievements: achievements,
+  };
+
+  saveGamification(updated);
+  return updated;
+}
+
+export function getCurrentLevel(xp: number): {
+  current: NursingLevel;
+  next: NursingLevel | null;
+  progressPercent: number;
+} {
   const current =
-    NURSING_LEVELS.slice().reverse().find((l) => xp >= l.minXp) ?? NURSING_LEVELS[0];
-  const next = NURSING_LEVELS.find((l) => l.level === current.level + 1);
+    [...NURSING_LEVELS].reverse().find((lvl) => xp >= lvl.minXp) ?? NURSING_LEVELS[0];
+  
+  const currentIndex = NURSING_LEVELS.findIndex((lvl) => lvl.level === current.level);
+  const next = NURSING_LEVELS[currentIndex + 1] ?? null;
 
   let progressPercent = 100;
   if (next) {
     const range = next.minXp - current.minXp;
-    const earned = xp - current.minXp;
-    progressPercent = Math.min(100, Math.max(0, Math.round((earned / range) * 100)));
+    const gained = xp - current.minXp;
+    progressPercent = Math.min(100, Math.max(0, Math.round((gained / range) * 100)));
   }
 
   return { current, next, progressPercent };
 }
 
-export function addXpAndRecordActivity(
-  xpToAdd: number,
-  options?: {
-    cardsReviewed?: number;
-    questionsAnswered?: number;
-    studyMinutes?: number;
+export const ALL_ACHIEVEMENTS: Achievement[] = [
+  {
+    id: "first_quiz",
+    title: "First Clinical Step",
+    description: "Complete your first nursing practice quiz.",
+    icon: "🎯",
+    category: "quiz",
+    progress: 100,
   },
-): { state: GamificationState; newlyUnlocked: Achievement[] } {
-  const state = loadGamification();
-  const today = new Date().toISOString().split("T")[0];
-
-  // Streak calculation (prevents duplicate increment on same day)
-  if (state.lastStudyDate !== today) {
-    const lastDate = new Date(state.lastStudyDate);
-    const currDate = new Date(today);
-    const diffDays = Math.round((currDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 1) {
-      state.currentStreak += 1;
-      state.totalXp += 50; // Streak bonus
-    } else if (diffDays > 1) {
-      state.currentStreak = 1;
-    }
-    state.lastStudyDate = today;
-    if (state.currentStreak > state.longestStreak) {
-      state.longestStreak = state.currentStreak;
-    }
-  }
-
-  state.totalXp += xpToAdd;
-  if (options?.cardsReviewed) state.totalCardsReviewed += options.cardsReviewed;
-  if (options?.questionsAnswered) state.totalQuestionsAnswered += options.questionsAnswered;
-  if (options?.studyMinutes) state.totalStudyMinutes += options.studyMinutes;
-
-  // Check achievements
-  const allAchievements = getAllAchievements(state);
-  const newlyUnlocked: Achievement[] = [];
-
-  allAchievements.forEach((ach) => {
-    if (ach.progress >= 100 && !state.unlockedAchievements.includes(ach.id)) {
-      state.unlockedAchievements.push(ach.id);
-      newlyUnlocked.push(ach);
-      state.totalXp += 100; // Achievement bonus XP
-    }
-  });
-
-  saveGamification(state);
-  return { state, newlyUnlocked };
-}
-
-export function getAllAchievements(state: GamificationState): Achievement[] {
-  const isUnlocked = (id: string) => state.unlockedAchievements.includes(id);
-
-  return [
-    {
-      id: "first_quiz",
-      title: "First Step into Clinicals",
-      description: "Complete your first practice quiz.",
-      icon: "🎯",
-      category: "quiz",
-      progress: state.totalQuestionsAnswered >= 1 ? 100 : 0,
-      unlockedAt: isUnlocked("first_quiz") ? "Completed" : undefined,
-    },
-    {
-      id: "streak_7",
-      title: "7-Day Dedication",
-      description: "Maintain a continuous 7-day study streak.",
-      icon: "🔥",
-      category: "streak",
-      progress: Math.min(100, Math.round((state.currentStreak / 7) * 100)),
-      unlockedAt: isUnlocked("streak_7") ? "Completed" : undefined,
-    },
-    {
-      id: "cards_50",
-      title: "Flashcard Enthusiast",
-      description: "Review 50 flashcards using spaced repetition.",
-      icon: "🃏",
-      category: "flashcard",
-      progress: Math.min(100, Math.round((state.totalCardsReviewed / 50) * 100)),
-      unlockedAt: isUnlocked("cards_50") ? "Completed" : undefined,
-    },
-    {
-      id: "cards_100",
-      title: "Memory Master",
-      description: "Review 100 flashcards across all nursing topics.",
-      icon: "🧠",
-      category: "flashcard",
-      progress: Math.min(100, Math.round((state.totalCardsReviewed / 100) * 100)),
-      unlockedAt: isUnlocked("cards_100") ? "Completed" : undefined,
-    },
-    {
-      id: "questions_100",
-      title: "Question Centurion",
-      description: "Answer 100 NCLEX and PNLE style questions.",
-      icon: "💯",
-      category: "quiz",
-      progress: Math.min(100, Math.round((state.totalQuestionsAnswered / 100) * 100)),
-      unlockedAt: isUnlocked("questions_100") ? "Completed" : undefined,
-    },
-    {
-      id: "study_10h",
-      title: "10 Clinical Study Hours",
-      description: "Log 600 minutes (10 hours) of focused study sessions.",
-      icon: "⏱️",
-      category: "timer",
-      progress: Math.min(100, Math.round((state.totalStudyMinutes / 600) * 100)),
-      unlockedAt: isUnlocked("study_10h") ? "Completed" : undefined,
-    },
-    {
-      id: "cardiac_expert",
-      title: "Cardiac Expert",
-      description: "Complete Cardiovascular anatomy & Med-Surg cardiac practice.",
-      icon: "❤️",
-      category: "mastery",
-      progress: 85,
-      unlockedAt: isUnlocked("cardiac_expert") ? "Completed" : undefined,
-    },
-  ];
-}
+  {
+    id: "perfect_quiz",
+    title: "Clinical Excellence",
+    description: "Score 100% on any practice quiz.",
+    icon: "💯",
+    category: "quiz",
+    progress: 0,
+  },
+  {
+    id: "cards_10",
+    title: "Active Recall Beginner",
+    description: "Review 10 flashcards using spaced repetition.",
+    icon: "🎴",
+    category: "flashcard",
+    progress: 100,
+  },
+  {
+    id: "cards_50",
+    title: "Memory Master",
+    description: "Review 50 flashcards across all nursing topics.",
+    icon: "🧠",
+    category: "flashcard",
+    progress: 0,
+  },
+  {
+    id: "streak_7",
+    title: "Dedication Habit",
+    description: "Maintain a 7-day continuous study streak.",
+    icon: "🔥",
+    category: "streak",
+    progress: 57,
+  },
+  {
+    id: "study_1h",
+    title: "Deep Focus",
+    description: "Log at least 60 minutes with the Pomodoro study timer.",
+    icon: "⏳",
+    category: "timer",
+    progress: 100,
+  },
+  {
+    id: "pharma_master",
+    title: "Pharmacology Whiz",
+    description: "Master high-alert PINCH medications and antidotes.",
+    icon: "💊",
+    category: "mastery",
+    progress: 75,
+  },
+  {
+    id: "chn_pro",
+    title: "Public Health Champion",
+    description: "Complete the Philippine Community Health Nursing curriculum.",
+    icon: "🇵🇭",
+    category: "mastery",
+    progress: 80,
+  },
+];

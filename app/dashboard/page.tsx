@@ -22,23 +22,32 @@ import { Button } from "@/components/ui/button";
 import { dashboardGoal, nextReviewCards, progressSummary } from "@/lib/study-progress";
 import { getSubjectName, getTopicName, subjects, weakTopics } from "@/lib/study-data";
 import { loadDailyMessage, type DailyMotivationMessage } from "@/lib/admin-content";
-import { loadGamification } from "@/lib/gamification";
+import { getCurrentLevel, loadGamification, type GamificationState } from "@/lib/gamification";
 
 export default function DashboardPage() {
   const [dailyMsg, setDailyMsg] = useState<DailyMotivationMessage | null>(null);
-  const [streak, setStreak] = useState(4);
-  const [totalXp, setTotalXp] = useState(450);
+  const [gamification, setGamification] = useState<GamificationState | null>(null);
 
   useEffect(() => {
     setDailyMsg(loadDailyMessage());
-    const g = loadGamification();
-    setStreak(g.currentStreak);
-    setTotalXp(g.totalXp);
+    setGamification(loadGamification());
   }, []);
 
   const goal = dashboardGoal();
   const summary = progressSummary();
   const dueCards = nextReviewCards();
+
+  const streak = gamification?.currentStreak ?? 1;
+  const totalXp = gamification?.totalXp ?? 0;
+  const studyMinutes = gamification?.totalStudyMinutes ?? 0;
+  const questionsAnswered = gamification?.totalQuestionsAnswered ?? 0;
+  const cardsReviewed = gamification?.totalCardsReviewed ?? 0;
+  const level = getCurrentLevel(totalXp);
+
+  const formattedStudyTime =
+    studyMinutes > 0
+      ? `${Math.floor(studyMinutes / 60)}h ${studyMinutes % 60}m`
+      : "0h 0m";
 
   return (
     <div className="space-y-6">
@@ -60,38 +69,38 @@ export default function DashboardPage() {
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <StatCard
           label="Study Streak"
-          value={`${streak} Days`}
+          value={`${streak} ${streak === 1 ? "Day" : "Days"}`}
           detail="Complete 1 quiz or flashcard set today"
           icon={Flame}
         />
         <StatCard
           label="Total Study Time"
-          value="7h 35m"
+          value={formattedStudyTime}
           detail="Logged clinical study sessions"
           icon={Clock3}
         />
         <StatCard
           label="Questions Mastered"
-          value={`${summary.totalQuestions}`}
+          value={`${questionsAnswered}`}
           detail="NCLEX & PNLE question bank"
           icon={GraduationCap}
         />
         <StatCard
           label="Overall Progress"
-          value={`${summary.averageMastery}%`}
+          value={`${Math.min(100, Math.round((questionsAnswered / 50) * 100))}%`}
           detail="Calculated from topic mastery"
           icon={BarChart3}
         />
         <StatCard
           label="Flashcards Mastered"
-          value={`${summary.totalFlashcards}`}
+          value={`${cardsReviewed}`}
           detail="Spaced repetition active deck"
           icon={BookOpenCheck}
         />
         <StatCard
           label="Total XP Earned"
           value={`${totalXp} XP`}
-          detail="Tier: Future Nurse"
+          detail={`Tier: ${level.current.title} ${level.current.badge}`}
           icon={Layers3}
         />
       </section>
@@ -104,7 +113,10 @@ export default function DashboardPage() {
             <p className="text-xs text-slate-600">{goal.label}</p>
           </CardHeader>
           <CardBody className="p-6 space-y-5">
-            <ProgressBar value={Math.round((goal.done / goal.total) * 100)} label={`${goal.done} / ${goal.total} Completed`} />
+            <ProgressBar
+              value={Math.min(100, Math.round((questionsAnswered / goal.total) * 100))}
+              label={`${Math.min(goal.total, questionsAnswered)} / ${goal.total} Completed`}
+            />
 
             <div className="grid grid-cols-3 gap-2">
               <Link
@@ -155,24 +167,39 @@ export default function DashboardPage() {
       <section className="grid gap-6 lg:grid-cols-2">
         <Card className="shadow-sm">
           <CardHeader className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-black text-slate-950">Identified Weak Areas</h2>
+            <h2 className="text-base font-black text-slate-950">High-Yield Priority Topics</h2>
           </CardHeader>
-          <CardBody className="space-y-4 p-6">
-            {weakTopics().slice(0, 4).map((topic) => (
-              <ProgressBar key={topic.id} value={topic.mastery} label={`${topic.name} (${topic.subjectName})`} />
+          <CardBody className="space-y-3 p-4">
+            {weakTopics().map((topic) => (
+              <div key={topic.id} className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+                <div>
+                  <p className="text-xs font-bold text-slate-950">{topic.name}</p>
+                  <p className="text-[11px] text-slate-500">{topic.highYield ? "High Yield" : "Core"}</p>
+                </div>
+                <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700">
+                  Needs Review
+                </span>
+              </div>
             ))}
           </CardBody>
         </Card>
 
         <Card className="shadow-sm">
           <CardHeader className="border-b border-slate-100 pb-3">
-            <h2 className="text-base font-black text-slate-950">Curriculum Snapshot</h2>
+            <h2 className="text-base font-black text-slate-950">Subject Curricula (7 Core Areas)</h2>
           </CardHeader>
-          <CardBody className="grid gap-3 sm:grid-cols-2 p-4">
+          <CardBody className="space-y-2 p-4">
             {subjects.slice(0, 4).map((subject) => (
-              <div key={subject.id} className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-300">
-                <p className="text-xs font-bold text-slate-950">{subject.name}</p>
-                <p className="mt-1 text-[11px] text-slate-500">{subject.topics.length} Subtopics</p>
+              <div key={subject.id} className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-7 w-7 items-center justify-center rounded bg-slate-950 text-white text-xs font-bold">
+                    {subject.name.charAt(0)}
+                  </span>
+                  <p className="text-xs font-bold text-slate-950">{subject.name}</p>
+                </div>
+                <Link href={`/subjects/${subject.id}`} className="text-xs font-bold text-emerald-700 hover:text-emerald-800">
+                  Open
+                </Link>
               </div>
             ))}
           </CardBody>
