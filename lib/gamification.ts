@@ -67,7 +67,7 @@ export function saveGamification(state: GamificationState): void {
   }
 }
 
-export function addXp(amount: number, reason: string): GamificationState {
+export function addXp(amount: number, reason?: string): GamificationState {
   const current = loadGamification();
   const updated = {
     ...current,
@@ -77,17 +77,24 @@ export function addXp(amount: number, reason: string): GamificationState {
   return updated;
 }
 
-export function recordStudySession(minutes: number): GamificationState {
+export function addXpAndRecordActivity(
+  xpAmount: number,
+  metadata?: {
+    studyMinutes?: number;
+    cardsReviewed?: number;
+    questionsAnswered?: number;
+  },
+): { newlyUnlocked: string[]; updated: GamificationState } {
   const current = loadGamification();
   const today = new Date().toISOString().split("T")[0];
-  
+
   let newStreak = current.currentStreak;
   if (current.lastStudyDate !== today) {
     const lastDate = new Date(current.lastStudyDate);
     const currentDate = new Date(today);
     const diffTime = Math.abs(currentDate.getTime() - lastDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     if (diffDays === 1) {
       newStreak += 1;
     } else if (diffDays > 1) {
@@ -95,57 +102,63 @@ export function recordStudySession(minutes: number): GamificationState {
     }
   }
 
+  const newStudyMinutes = current.totalStudyMinutes + (metadata?.studyMinutes ?? 0);
+  const newCards = current.totalCardsReviewed + (metadata?.cardsReviewed ?? 0);
+  const newQuestions = current.totalQuestionsAnswered + (metadata?.questionsAnswered ?? 0);
+  const newXp = current.totalXp + xpAmount;
+
+  const newlyUnlocked: string[] = [];
+  const achievements = [...current.unlockedAchievements];
+
+  function checkUnlock(id: string, condition: boolean) {
+    if (condition && !achievements.includes(id)) {
+      achievements.push(id);
+      newlyUnlocked.push(id);
+    }
+  }
+
+  checkUnlock("first_quiz", newQuestions >= 1);
+  checkUnlock("questions_50", newQuestions >= 50);
+  checkUnlock("cards_10", newCards >= 10);
+  checkUnlock("cards_50", newCards >= 50);
+  checkUnlock("study_1h", newStudyMinutes >= 60);
+  checkUnlock("streak_7", newStreak >= 7);
+
   const updated: GamificationState = {
     ...current,
-    totalStudyMinutes: current.totalStudyMinutes + minutes,
-    totalXp: current.totalXp + Math.round(minutes * 2), // 2 XP per focused study minute
+    totalXp: newXp,
+    totalStudyMinutes: newStudyMinutes,
+    totalCardsReviewed: newCards,
+    totalQuestionsAnswered: newQuestions,
     currentStreak: newStreak,
     longestStreak: Math.max(current.longestStreak, newStreak),
     lastStudyDate: today,
+    unlockedAchievements: achievements,
   };
 
   saveGamification(updated);
+  return { newlyUnlocked, updated };
+}
+
+export function recordStudySession(minutes: number): GamificationState {
+  const { updated } = addXpAndRecordActivity(Math.round(minutes * 2), {
+    studyMinutes: minutes,
+  });
   return updated;
 }
 
 export function recordQuizCompletion(scorePercent: number, questionCount: number): GamificationState {
-  const current = loadGamification();
-  const earnedXp = Math.round(questionCount * 10 * (scorePercent / 100)); // up to 10 XP per question
-  
-  const achievements = [...current.unlockedAchievements];
-  if (!achievements.includes("first_quiz")) achievements.push("first_quiz");
-  if (scorePercent === 100 && !achievements.includes("perfect_quiz")) achievements.push("perfect_quiz");
-  if (current.totalQuestionsAnswered + questionCount >= 50 && !achievements.includes("questions_50")) {
-    achievements.push("questions_50");
-  }
-
-  const updated: GamificationState = {
-    ...current,
-    totalQuestionsAnswered: current.totalQuestionsAnswered + questionCount,
-    totalXp: current.totalXp + earnedXp,
-    unlockedAchievements: achievements,
-  };
-
-  saveGamification(updated);
+  const earnedXp = Math.round(questionCount * 10 * (scorePercent / 100));
+  const { updated } = addXpAndRecordActivity(earnedXp, {
+    questionsAnswered: questionCount,
+  });
   return updated;
 }
 
 export function recordFlashcardReviewed(): GamificationState {
-  const current = loadGamification();
-  const achievements = [...current.unlockedAchievements];
-  const newCount = current.totalCardsReviewed + 1;
-
-  if (newCount >= 10 && !achievements.includes("cards_10")) achievements.push("cards_10");
-  if (newCount >= 50 && !achievements.includes("cards_50")) achievements.push("cards_50");
-
-  const updated: GamificationState = {
-    ...current,
-    totalCardsReviewed: newCount,
-    totalXp: current.totalXp + 5, // 5 XP per flashcard
-    unlockedAchievements: achievements,
-  };
-
-  saveGamification(updated);
+  const { updated } = addXpAndRecordActivity(5, {
+    cardsReviewed: 1,
+  });
   return updated;
 }
 
@@ -156,7 +169,7 @@ export function getCurrentLevel(xp: number): {
 } {
   const current =
     [...NURSING_LEVELS].reverse().find((lvl) => xp >= lvl.minXp) ?? NURSING_LEVELS[0];
-  
+
   const currentIndex = NURSING_LEVELS.findIndex((lvl) => lvl.level === current.level);
   const next = NURSING_LEVELS[currentIndex + 1] ?? null;
 
@@ -170,14 +183,14 @@ export function getCurrentLevel(xp: number): {
   return { current, next, progressPercent };
 }
 
-export const ALL_ACHIEVEMENTS: Achievement[] = [
+export const BASE_ACHIEVEMENTS: Achievement[] = [
   {
     id: "first_quiz",
     title: "First Clinical Step",
     description: "Complete your first nursing practice quiz.",
     icon: "🎯",
     category: "quiz",
-    progress: 100,
+    progress: 0,
   },
   {
     id: "perfect_quiz",
@@ -193,7 +206,7 @@ export const ALL_ACHIEVEMENTS: Achievement[] = [
     description: "Review 10 flashcards using spaced repetition.",
     icon: "🎴",
     category: "flashcard",
-    progress: 100,
+    progress: 0,
   },
   {
     id: "cards_50",
@@ -209,7 +222,7 @@ export const ALL_ACHIEVEMENTS: Achievement[] = [
     description: "Maintain a 7-day continuous study streak.",
     icon: "🔥",
     category: "streak",
-    progress: 57,
+    progress: 0,
   },
   {
     id: "study_1h",
@@ -217,7 +230,7 @@ export const ALL_ACHIEVEMENTS: Achievement[] = [
     description: "Log at least 60 minutes with the Pomodoro study timer.",
     icon: "⏳",
     category: "timer",
-    progress: 100,
+    progress: 0,
   },
   {
     id: "pharma_master",
@@ -225,7 +238,7 @@ export const ALL_ACHIEVEMENTS: Achievement[] = [
     description: "Master high-alert PINCH medications and antidotes.",
     icon: "💊",
     category: "mastery",
-    progress: 75,
+    progress: 0,
   },
   {
     id: "chn_pro",
@@ -233,6 +246,44 @@ export const ALL_ACHIEVEMENTS: Achievement[] = [
     description: "Complete the Philippine Community Health Nursing curriculum.",
     icon: "🇵🇭",
     category: "mastery",
-    progress: 80,
+    progress: 0,
   },
 ];
+
+export function getAllAchievements(state?: GamificationState): Achievement[] {
+  const g = state ?? loadGamification();
+
+  return BASE_ACHIEVEMENTS.map((ach) => {
+    const isUnlocked = g.unlockedAchievements.includes(ach.id);
+    let progress = isUnlocked ? 100 : 0;
+
+    if (!isUnlocked) {
+      switch (ach.id) {
+        case "first_quiz":
+          progress = g.totalQuestionsAnswered >= 1 ? 100 : 0;
+          break;
+        case "questions_50":
+          progress = Math.min(100, Math.round((g.totalQuestionsAnswered / 50) * 100));
+          break;
+        case "cards_10":
+          progress = Math.min(100, Math.round((g.totalCardsReviewed / 10) * 100));
+          break;
+        case "cards_50":
+          progress = Math.min(100, Math.round((g.totalCardsReviewed / 50) * 100));
+          break;
+        case "study_1h":
+          progress = Math.min(100, Math.round((g.totalStudyMinutes / 60) * 100));
+          break;
+        case "streak_7":
+          progress = Math.min(100, Math.round((g.currentStreak / 7) * 100));
+          break;
+      }
+    }
+
+    return {
+      ...ach,
+      progress,
+      unlockedAt: isUnlocked ? "Unlocked" : undefined,
+    };
+  });
+}

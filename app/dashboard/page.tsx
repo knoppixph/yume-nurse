@@ -174,7 +174,7 @@ export default function DashboardPage() {
               <div key={topic.id} className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
                 <div>
                   <p className="text-xs font-bold text-slate-950">{topic.name}</p>
-                  <p className="text-[11px] text-slate-500">{topic.highYield ? "High Yield" : "Core"}</p>
+                  <p className="text-[11px] text-slate-500">{topic.subjectName}</p>
                 </div>
                 <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700">
                   Needs Review
