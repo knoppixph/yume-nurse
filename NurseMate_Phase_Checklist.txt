@@ -1,0 +1,251 @@
+NurseMate Build Phases Checklist
+Generated for: C:\Users\user\Desktop\nurse mate
+
+Goal:
+Build NurseMate as a real nursing reviewer web app in phases, starting with a useful MVP and expanding toward the full PDF specification.
+
+
+PHASE 0 - PROJECT SETUP AND DECISIONS
+[x] Confirm app name: NurseMate
+[x] Confirm primary user: nursing student studying mostly on mobile
+[x] Confirm initial deployment target: Vercel
+[x] Confirm database/backend target: Supabase
+[x] Confirm AI provider: OpenAI API
+[x] Create Next.js + React + TypeScript project
+[x] Install Tailwind CSS
+[x] Install UI/component dependencies
+[x] Install Lucide icons
+[x] Create project folder structure: app, components, lib, hooks, types, services, supabase, public, styles
+[x] Create .env.example
+[x] Create initial README
+[x] Run first TypeScript/build check
+
+
+PHASE 1 - MVP UI SHELL
+[x] Build mobile-first app layout
+[x] Build desktop sidebar navigation
+[x] Build mobile bottom navigation
+[x] Add light theme styling
+[x] Add clean NurseMate visual identity
+[x] Create reusable components: Button, Card, Input, Select, ProgressBar, EmptyState, LoadingState
+[x] Build landing page
+[x] Build dashboard page
+[x] Build subjects page
+[x] Build flashcards page shell
+[x] Build quiz page shell
+[x] Build progress page shell
+[x] Build profile page shell
+[x] Add basic loading and empty states
+[ ] Check responsive layout on mobile and desktop
+
+
+PHASE 2 - LOCAL DATA MVP
+[x] Add default nursing subjects
+[x] Add default topics per subject
+[x] Add sample flashcards
+[x] Add sample quiz questions
+[x] Build subject/topic browsing
+[x] Build flashcard flip interaction
+[x] Build basic flashcard review buttons: Again, Hard, Good, Easy
+[x] Build basic quiz flow
+[x] Hide answers until submission
+[x] Show correct/incorrect feedback
+[x] Show rationales after answering
+[x] Build quiz results screen
+[x] Build mistake bank from missed questions
+[x] Add basic progress calculations from local/sample data
+[x] Run TypeScript/build check
+
+
+PHASE 3 - SUPABASE DATABASE
+[x] Create Supabase SQL schema/migrations
+[x] Add profiles table
+[x] Add subjects table
+[x] Add topics table
+[x] Add flashcards table
+[x] Add flashcard_progress table
+[x] Add questions table
+[x] Add question_options table
+[x] Add quiz_attempts table
+[x] Add quiz_answers table
+[x] Add study_sessions table
+[x] Add study_materials table
+[x] Add study_streaks table
+[x] Add ai_generations table
+[x] Add user_settings table
+[x] Add favorites support
+[x] Add indexes and foreign keys
+[x] Add seed data script
+[x] Document Supabase setup in README
+
+
+PHASE 4 - AUTHENTICATION AND PROFILE
+[x] Connect Supabase client/server helpers
+[x] Implement sign up
+[x] Implement login
+[x] Implement logout
+[x] Implement forgot password
+[x] Implement reset password
+[x] Protect authenticated pages
+[x] Redirect unauthenticated users to login
+[x] Build profile setup
+[x] Add profile fields: full name, display name, email, year level, school, profile picture, study goal
+[x] Save and load profile data
+[x] Add user role support: student/admin
+[x] Run auth checks
+
+
+PHASE 5 - REAL FLASHCARD SYSTEM
+[x] Store flashcards in Supabase
+[x] Load flashcards by subject/topic/difficulty
+[x] Save flashcard review results
+[x] Implement spaced repetition scheduling
+[x] Calculate flashcard mastery
+[x] Build Smart Review queue
+[x] Prioritize due cards and weak topics
+[x] Add favorites for flashcards
+[x] Add filters and search
+[x] Run TypeScript/build check
+
+
+PHASE 6 - REAL QUIZ SYSTEM
+[x] Store quiz questions in Supabase
+[x] Support multiple choice
+[x] Support true/false
+[x] Support select all that apply
+[x] Support identification
+[x] Support prioritization
+[x] Support patient scenario questions
+[x] Build visually distinct patient scenario card
+[x] Add quiz configuration: subject, topic, count, difficulty, type
+[x] Add randomize questions
+[x] Add randomize answers
+[x] Save every quiz attempt
+[x] Save quiz answers
+[x] Build review mistakes flow
+[x] Build NCLEX-style practice section
+[x] Add timed quiz mode
+[x] Run scoring tests
+
+
+PHASE 7 - PROGRESS, STREAKS, TIMER, GAMIFICATION
+[x] Build progress dashboard
+[x] Show overall mastery
+[x] Show subject mastery
+[x] Show quiz scores over time
+[x] Show questions answered
+[x] Show study time
+[x] Show weekly activity
+[x] Implement study streak logic
+[x] Prevent duplicate streak increments on same day
+[x] Build study timer: start, pause, resume, reset
+[x] Add default 25 minute study and 5 minute break settings
+[x] Save completed study sessions
+[x] Add XP system
+[x] Add levels
+[x] Add achievements
+[x] Test streak calculation
+[x] Test progress calculation
+
+
+PHASE 8 - STUDY MATERIALS AND PDF UPLOAD
+[x] Set up Supabase Storage bucket
+[x] Build PDF upload form
+[x] Validate file type
+[x] Validate file size
+[x] Save subject/topic metadata
+[x] Display filename, subject, topic, upload date
+[x] Build materials list
+[x] Build material delete flow
+[x] Ensure files are private/secure
+[x] Add admin upload support
+[x] Test file upload and deletion
+
+
+PHASE 9 - AI FEATURES
+[x] Add server-side OpenAI API route/service
+[x] Keep API key server-only
+[x] Build NurseMate AI chat UI
+[x] Add education/medical disclaimer
+[x] Add AI response structure: explanation, nursing relevance, signs/symptoms, nursing considerations, memory tips
+[x] Block personalized diagnosis/treatment recommendations
+[x] Build AI flashcard generator from text
+[x] Build AI generator from uploaded study material if feasible
+[x] Generate summary, flashcards, quiz questions, key terms
+[x] Preview generated content before saving
+[x] Save only after user confirmation
+[x] Clearly label AI-generated material
+[x] Store AI generation history
+[x] Add basic rate limiting
+
+
+PHASE 10 - ADMIN DASHBOARD AND CONTENT MANAGEMENT
+[x] Build admin-only route protection
+[x] Enforce role checks server-side
+[x] Add/edit/delete subjects
+[x] Add/edit/delete topics
+[x] Add/edit/delete flashcards
+[x] Add/edit/delete quiz questions
+[x] Upload study materials as admin
+[x] View users
+[x] View app statistics
+[x] Edit personalized dashboard message
+[x] Add admin seed/setup instructions
+[x] Test student cannot access admin features
+
+
+PHASE 11 - SECURITY AND RLS
+[x] Enable Supabase Row Level Security
+[x] Add RLS policies for profiles
+[x] Add RLS policies for study progress
+[x] Add RLS policies for quiz attempts and answers
+[x] Add RLS policies for study materials
+[x] Add RLS policies for admin-managed content
+[x] Validate API inputs
+[x] Validate file uploads
+[x] Hide internal errors from users
+[x] Confirm no private keys are exposed client-side
+[x] Review authorization on every server action/API route
+
+
+PHASE 12 - POLISH, ACCESSIBILITY, TESTS, DEPLOYMENT
+[x] Add dark mode: light, dark, system
+[x] Add keyboard navigation
+[x] Add proper labels and focus states
+[x] Check color contrast
+[x] Add animations: card hover, button transitions, flashcard flip, quiz feedback, achievement unlock
+[x] Improve mobile spacing and tap targets
+[x] Add unit tests for flashcard scheduling
+[x] Add unit tests for quiz scoring
+[x] Add unit tests for streak calculation
+[x] Add unit tests for progress calculation
+[x] Add unit tests for question randomization
+[x] Run lint
+[x] Run TypeScript check
+[x] Run tests
+[x] Run production build
+[x] Fix all errors
+[x] Complete README setup instructions
+[x] Document environment variables
+[x] Document Supabase migration steps
+[x] Document local development commands
+[x] Document Vercel deployment steps
+
+
+FIRST CREDIT-FRIENDLY TARGET
+[x] Complete Phases 0 through 2 first
+[x] Result should be a working local NurseMate MVP with real UI, sample subjects, flashcards, quizzes, rationales, progress basics, and mobile layout
+[x] Stop and review before adding Supabase/Auth/AI
+
+
+FULL BUILD TARGET
+[x] Complete Phases 0 through 12
+[x] Result should match the PDF as a full production-style app with auth, database, admin CMS, uploads, AI, progress tracking, tests, and deployment documentation
+
+
+NOTES
+[ ] ChatGPT Plus may help with Codex usage, but the actual app's OpenAI API features require a separate OpenAI API key/billing later
+[ ] Supabase setup requires a Supabase project later
+[ ] Never place real secrets in code or commits
+[ ] Use .env.local for real local secrets
+[ ] Keep each phase buildable and testable before moving on
