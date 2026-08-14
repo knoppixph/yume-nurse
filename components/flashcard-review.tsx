@@ -96,7 +96,7 @@ export function FlashcardReview() {
 
   const activeCard = filteredCards[activeIndex] ?? filteredCards[0];
   const cardProgress = activeCard ? progressMap[activeCard.id] : undefined;
-  const mastery = cardProgress?.masteryScore ?? activeCard?.mastery ?? 50;
+  const mastery = cardProgress?.masteryScore ?? 0;
   const isFav = activeCard ? favorites.has(activeCard.id) : false;
   const dueLabel = formatDueTime(cardProgress);
 

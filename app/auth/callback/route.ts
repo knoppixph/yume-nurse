@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { cleanInternalPath } from "@/lib/auth/validation";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { ensureProfile } from "@/lib/auth/session";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -14,7 +15,11 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(code);
+    const { data } = await supabase.auth.exchangeCodeForSession(code);
+    // Ensure the profile row exists for this user (e.g. after email confirmation)
+    if (data?.user) {
+      await ensureProfile(data.user);
+    }
   }
 
   return NextResponse.redirect(new URL(next, request.url));

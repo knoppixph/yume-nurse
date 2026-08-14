@@ -1,21 +1,44 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Brain, ClipboardCheck } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { nextReviewCards, progressSummary } from "@/lib/study-progress";
-import { getSubjectName, getTopicName, weakTopics } from "@/lib/study-data";
+import { getSubjectName, getTopicName } from "@/lib/study-data";
+import { loadMasteryMap } from "@/lib/user-progress";
+import { subjects } from "@/lib/study-data";
 
 export default function ReviewPage() {
   const dueCards = nextReviewCards();
   const summary = progressSummary();
+  const [masteryMap, setMasteryMap] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    setMasteryMap(loadMasteryMap());
+  }, []);
+
+  // Compute real weak topics from user's actual mastery (lowest mastery first)
+  const weakTopicsList = subjects
+    .flatMap((s) =>
+      s.topics.map((t) => ({
+        ...t,
+        subjectId: s.id,
+        subjectName: s.name,
+        realMastery: masteryMap[t.id] ?? 0,
+      }))
+    )
+    .sort((a, b) => a.realMastery - b.realMastery)
+    .slice(0, 5);
 
   return (
     <>
       <PageHeader
         eyebrow="Smart Review"
         title="Questions you need to review"
-        description="Local weak-topic detection prioritizes due cards, lower mastery, and recent misses."
+        description="Prioritizes topics with the lowest mastery and flashcards you haven't reviewed yet."
       />
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -36,10 +59,12 @@ export default function ReviewPage() {
                       {getSubjectName(card.subjectId)} - {getTopicName(card.subjectId, card.topicId)}
                     </p>
                   </div>
-                  <span className="w-fit rounded-md bg-rose-50 px-2 py-1 text-xs font-bold text-rose-700">{card.due}</span>
+                  <span className="w-fit rounded-md bg-rose-50 px-2 py-1 text-xs font-bold text-rose-700">
+                    {card.due}
+                  </span>
                 </div>
                 <div className="mt-4">
-                  <ProgressBar value={card.mastery} label="Mastery" />
+                  <ProgressBar value={masteryMap[card.topicId] ?? 0} label="Topic Mastery" />
                 </div>
               </div>
             ))}
@@ -61,9 +86,17 @@ export default function ReviewPage() {
               </div>
             </CardHeader>
             <CardBody className="space-y-4">
-              {weakTopics().map((topic) => (
-                <ProgressBar key={topic.id} value={topic.mastery} label={topic.name} />
-              ))}
+              {weakTopicsList.length === 0 ? (
+                <p className="text-xs text-slate-500">Start studying to see your weak topics here.</p>
+              ) : (
+                weakTopicsList.map((topic) => (
+                  <ProgressBar
+                    key={topic.id}
+                    value={topic.realMastery}
+                    label={topic.realMastery === 0 ? `${topic.name} — Not started` : topic.name}
+                  />
+                ))
+              )}
             </CardBody>
           </Card>
 
@@ -74,11 +107,13 @@ export default function ReviewPage() {
             <CardBody className="grid grid-cols-2 gap-3">
               <div className="rounded-md bg-slate-100 p-4">
                 <p className="text-xs font-bold text-slate-500">Due cards</p>
-                <p className="mt-1 text-2xl font-black text-slate-950">{summary.dueCards}</p>
+                <p className="mt-1 text-2xl font-black text-slate-950">{dueCards.length}</p>
               </div>
               <div className="rounded-md bg-slate-100 p-4">
                 <p className="text-xs font-bold text-slate-500">Weak topics</p>
-                <p className="mt-1 text-2xl font-black text-slate-950">{summary.weakTopics.length}</p>
+                <p className="mt-1 text-2xl font-black text-slate-950">
+                  {weakTopicsList.filter((t) => t.realMastery < 50).length}
+                </p>
               </div>
             </CardBody>
           </Card>
@@ -87,4 +122,3 @@ export default function ReviewPage() {
     </>
   );
 }
-

@@ -19,26 +19,24 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { StudyTimer } from "@/components/study-timer";
 import { progressSummary, weeklyActivity } from "@/lib/study-progress";
 import { subjects } from "@/lib/study-data";
-import {
-  getAllAchievements,
-  getCurrentLevel,
-  loadGamification,
-  type GamificationState,
-} from "@/lib/gamification";
+import { getAllAchievements, getCurrentLevel, loadGamification, type GamificationState } from "@/lib/gamification";
+import { loadMasteryMap } from "@/lib/user-progress";
 import { cn } from "@/lib/utils";
 
 export default function ProgressPage() {
   const [gamification, setGamification] = useState<GamificationState | null>(null);
+  const [masteryMap, setMasteryMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setGamification(loadGamification());
+    setMasteryMap(loadMasteryMap());
   }, []);
 
   const summary = progressSummary();
   const maxQuestions = Math.max(...weeklyActivity.map((day) => day.questions));
 
-  const totalXp = gamification?.totalXp ?? 450;
-  const currentStreak = gamification?.currentStreak ?? 4;
+  const totalXp = gamification?.totalXp ?? 0;
+  const currentStreak = gamification?.currentStreak ?? 0;
   const levelInfo = getCurrentLevel(totalXp);
   const achievements = gamification ? getAllAchievements(gamification) : [];
 
@@ -60,8 +58,8 @@ export default function ProgressPage() {
         />
         <StatCard
           label="Study Streak"
-          value={`${currentStreak} Days`}
-          detail={`Longest: ${gamification?.longestStreak ?? 7} days`}
+          value={`${currentStreak} ${currentStreak === 1 ? "Day" : "Days"}`}
+          detail={`Longest: ${gamification?.longestStreak ?? 0} days`}
           icon={Flame}
         />
         <StatCard
@@ -72,7 +70,7 @@ export default function ProgressPage() {
         />
         <StatCard
           label="Total Study Time"
-          value={`${Math.floor((gamification?.totalStudyMinutes ?? 455) / 60)}h ${(gamification?.totalStudyMinutes ?? 455) % 60}m`}
+          value={`${Math.floor((gamification?.totalStudyMinutes ?? 0) / 60)}h ${(gamification?.totalStudyMinutes ?? 0) % 60}m`}
           detail="Pomodoro & practice sessions"
           icon={Clock3}
         />
@@ -121,7 +119,7 @@ export default function ProgressPage() {
                   <div className="flex h-44 w-full items-end rounded-lg bg-slate-100 p-1">
                     <div
                       className="w-full rounded-md bg-gradient-to-t from-teal-500 to-sky-400 transition-all duration-300"
-                      style={{ height: `${Math.max(15, (day.questions / maxQuestions) * 100)}%` }}
+                      style={{ height: maxQuestions === 0 ? "4px" : `${Math.max(4, (day.questions / maxQuestions) * 100)}%` }}
                     />
                   </div>
                   <span className="text-[11px] font-bold text-slate-600">{day.day}</span>
@@ -141,10 +139,10 @@ export default function ProgressPage() {
           </CardHeader>
           <CardBody className="space-y-4 p-6">
             {subjects.map((subject) => {
-              const mastery = Math.round(
-                subject.topics.reduce((sum, topic) => sum + topic.mastery, 0) / subject.topics.length,
-              );
-              return <ProgressBar key={subject.id} value={mastery} label={subject.name} />;
+              const topicIds = subject.topics.map((t) => t.id);
+              const subjectMastery = topicIds.length === 0 ? 0 :
+                Math.round(topicIds.reduce((sum, id) => sum + (masteryMap[id] ?? 0), 0) / topicIds.length);
+              return <ProgressBar key={subject.id} value={subjectMastery} label={subject.name} />;
             })}
           </CardBody>
         </Card>
