@@ -51,11 +51,29 @@ export default async function ProfilePage({
             {configured && user ? (
               <ProfileForm profile={profile} authEmail={user.email ?? ""} />
             ) : (
-              <div className="rounded-md bg-amber-50 p-4">
-                <p className="text-sm font-bold text-amber-900">Supabase is not configured</p>
-                <p className="mt-2 text-sm leading-6 text-amber-800">
-                  Add Supabase environment variables before saving real profile data.
-                </p>
+              <div className="space-y-4">
+                <div className="rounded-xl border border-sky-200 bg-sky-50 p-4">
+                  <p className="text-xs font-bold text-sky-950">Local Demo Account Active</p>
+                  <p className="mt-1 text-xs leading-relaxed text-sky-800">
+                    You are exploring in Demo Mode. To save your permanent cloud profile, sign in with your real account.
+                  </p>
+                </div>
+                <ProfileForm
+                  profile={{
+                    id: "demo-user",
+                    full_name: "Yume Nurse Student",
+                    display_name: "Future Nurse",
+                    email: "student@yumenurse.app",
+                    year_level: "3rd Year BSN",
+                    school: "College of Nursing",
+                    profile_picture_url: null,
+                    study_goal: "Pass NCLEX-RN and Philippine PNLE with 90%+ score",
+                    role: "student",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                  }}
+                  authEmail="student@yumenurse.app"
+                />
               </div>
             )}
           </CardBody>
