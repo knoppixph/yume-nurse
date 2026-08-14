@@ -77,16 +77,16 @@ alter table public.flashcards enable row level security;
 alter table public.questions enable row level security;
 alter table public.question_options enable row level security;
 
--- Public/Student read access to published study curriculum
-create policy "Anyone can read published subjects"
+-- Public/Student read access to active study curriculum
+create policy "Anyone can read active subjects"
   on public.subjects
   for select
-  using (is_published = true or public.is_admin());
+  using (is_active = true or public.is_admin());
 
-create policy "Anyone can read published topics"
+create policy "Anyone can read active topics"
   on public.topics
   for select
-  using (is_published = true or public.is_admin());
+  using (is_active = true or public.is_admin());
 
 create policy "Anyone can read active flashcards"
   on public.flashcards
