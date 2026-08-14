@@ -1,10 +1,20 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { SubjectCard } from "@/components/subject-card";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { subjects } from "@/lib/study-data";
+import { loadMasteryMap } from "@/lib/user-progress";
 
 export default function SubjectsPage() {
+  const [masteryMap, setMasteryMap] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    setMasteryMap(loadMasteryMap());
+  }, []);
+
   return (
     <>
       <PageHeader
@@ -26,9 +36,16 @@ export default function SubjectsPage() {
               <h2 className="text-lg font-black text-slate-950">{subject.name}</h2>
             </CardHeader>
             <CardBody className="space-y-4">
-              {subject.topics.map((topic) => (
-                <ProgressBar key={topic.id} value={topic.mastery} label={topic.name} />
-              ))}
+              {subject.topics.map((topic) => {
+                const topicMastery = masteryMap[topic.id] ?? 0;
+                return (
+                  <ProgressBar
+                    key={topic.id}
+                    value={topicMastery}
+                    label={topicMastery === 0 ? `${topic.name} — Not started` : topic.name}
+                  />
+                );
+              })}
             </CardBody>
           </Card>
         ))}
@@ -36,4 +53,3 @@ export default function SubjectsPage() {
     </>
   );
 }
-

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Activity,
   Baby,
@@ -14,6 +17,7 @@ import {
 import { Card, CardBody } from "@/components/ui/card";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import type { Subject } from "@/types/study";
+import { getSubjectMastery } from "@/lib/user-progress";
 import { cn } from "@/lib/utils";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -45,9 +49,12 @@ type SubjectCardProps = {
 
 export function SubjectCard({ subject }: SubjectCardProps) {
   const Icon = iconMap[subject.icon] ?? HeartPulse;
-  const mastery = Math.round(
-    subject.topics.reduce((sum, topic) => sum + topic.mastery, 0) / subject.topics.length,
-  );
+  const [mastery, setMastery] = useState(0);
+
+  useEffect(() => {
+    const topicIds = subject.topics.map((t) => t.id);
+    setMastery(getSubjectMastery(topicIds));
+  }, [subject.topics]);
 
   return (
     <Card className="transition hover:-translate-y-0.5 hover:shadow-md">
@@ -62,7 +69,10 @@ export function SubjectCard({ subject }: SubjectCardProps) {
           </div>
         </div>
         <div className="mt-5">
-          <ProgressBar value={mastery} label="Mastery" />
+          <ProgressBar
+            value={mastery}
+            label={mastery === 0 ? "Not started yet — begin studying to earn mastery!" : "Mastery"}
+          />
         </div>
         <div className="mt-5 flex flex-wrap gap-2">
           {subject.topics.slice(0, 4).map((topic) => (
@@ -75,4 +85,3 @@ export function SubjectCard({ subject }: SubjectCardProps) {
     </Card>
   );
 }
-
