@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -8,6 +9,7 @@ import {
   Bot,
   Brain,
   FileText,
+  Flame,
   GraduationCap,
   Home,
   Layers3,
@@ -17,9 +19,13 @@ import {
   UserRound,
 } from "lucide-react";
 import { logoutAction } from "@/app/auth/actions";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/client";
+import { loadGamification } from "@/lib/gamification";
+import { loadDailyMessage } from "@/lib/admin-content";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+const studentNavItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
   { href: "/subjects", label: "Subjects", icon: Layers3 },
   { href: "/flashcards", label: "Flashcards", icon: BookOpen },
@@ -29,10 +35,9 @@ const navItems = [
   { href: "/progress", label: "Progress", icon: BarChart3 },
   { href: "/ai", label: "AI Assistant", icon: Bot },
   { href: "/profile", label: "Profile", icon: UserRound },
-  { href: "/admin", label: "Admin", icon: ShieldCheck },
 ];
 
-const mobileItems = navItems.filter((item) =>
+const mobileItems = studentNavItems.filter((item) =>
   ["/dashboard", "/review", "/quiz", "/progress", "/profile"].includes(item.href),
 );
 
@@ -44,10 +49,47 @@ type AppShellProps = {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [dailyMsg, setDailyMsg] = useState("Keep going, future nurse. One topic at a time. You have got this.");
+
+  useEffect(() => {
+    // Load streak from gamification state
+    const g = loadGamification();
+    setStreak(g.currentStreak);
+
+    // Load custom daily message
+    const msg = loadDailyMessage();
+    if (msg?.message) setDailyMsg(msg.message);
+
+    // Check admin role from Supabase
+    async function checkAdmin() {
+      if (!isSupabaseConfigured()) return;
+      try {
+        const supabase = createClient();
+        const { data: authData } = await supabase.auth.getUser();
+        if (authData.user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", authData.user.id)
+            .maybeSingle();
+          if (profile?.role === "admin") setIsAdmin(true);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    checkAdmin();
+  }, []);
 
   if (plainRoutes.includes(pathname)) {
     return <>{children}</>;
   }
+
+  const navItems = isAdmin
+    ? [...studentNavItems, { href: "/admin", label: "Admin", icon: ShieldCheck }]
+    : studentNavItems;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
@@ -73,6 +115,7 @@ export function AppShell({ children }: AppShellProps) {
                   className={cn(
                     "flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-950",
                     active && "bg-slate-950 text-white hover:bg-slate-950 hover:text-white",
+                    item.href === "/admin" && !active && "text-amber-700 hover:bg-amber-50 hover:text-amber-900",
                   )}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />
@@ -83,9 +126,7 @@ export function AppShell({ children }: AppShellProps) {
           </nav>
           <div className="border-t border-slate-100 p-5">
             <p className="text-sm font-semibold text-slate-950">A little message for you</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              Keep going, future nurse. One topic at a time. You have got this.
-            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-3">{dailyMsg}</p>
             <form action={logoutAction} className="mt-4">
               <button
                 type="submit"
@@ -107,7 +148,12 @@ export function AppShell({ children }: AppShellProps) {
             </span>
             <span className="text-base font-black text-slate-950">Yume Nurse</span>
           </Link>
-          <span className="rounded-md bg-teal-50 px-2 py-1 text-xs font-bold text-teal-700">4 day streak</span>
+          {streak > 0 && (
+            <span className="flex items-center gap-1 rounded-md bg-teal-50 px-2 py-1 text-xs font-bold text-teal-700">
+              <Flame className="h-3 w-3 text-teal-600" />
+              {streak} day streak
+            </span>
+          )}
         </div>
       </header>
 

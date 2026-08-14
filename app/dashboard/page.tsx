@@ -23,21 +23,40 @@ import { dashboardGoal, nextReviewCards, progressSummary } from "@/lib/study-pro
 import { getSubjectName, getTopicName, subjects, weakTopics } from "@/lib/study-data";
 import { loadDailyMessage, type DailyMotivationMessage } from "@/lib/admin-content";
 import { getCurrentLevel, loadGamification, type GamificationState } from "@/lib/gamification";
+import { loadMasteryMap } from "@/lib/user-progress";
 
 export default function DashboardPage() {
   const [dailyMsg, setDailyMsg] = useState<DailyMotivationMessage | null>(null);
   const [gamification, setGamification] = useState<GamificationState | null>(null);
+  const [masteryMap, setMasteryMap] = useState<Record<string, number>>({});
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     setDailyMsg(loadDailyMessage());
     setGamification(loadGamification());
+    setMasteryMap(loadMasteryMap());
+    // Check admin role
+    import("@/lib/supabase/config").then(({ isSupabaseConfigured }) => {
+      if (!isSupabaseConfigured()) return;
+      import("@/lib/supabase/client").then(({ createClient }) => {
+        const sb = createClient();
+        sb.auth.getUser().then(({ data }) => {
+          if (data.user) {
+            sb.from("profiles").select("role").eq("id", data.user.id).maybeSingle()
+              .then(({ data: profile }) => {
+                if (profile?.role === "admin") setIsAdmin(true);
+              });
+          }
+        });
+      });
+    });
   }, []);
 
   const goal = dashboardGoal();
   const summary = progressSummary();
   const dueCards = nextReviewCards();
 
-  const streak = gamification?.currentStreak ?? 1;
+  const streak = gamification?.currentStreak ?? 0;
   const totalXp = gamification?.totalXp ?? 0;
   const studyMinutes = gamification?.totalStudyMinutes ?? 0;
   const questionsAnswered = gamification?.totalQuestionsAnswered ?? 0;
@@ -170,17 +189,21 @@ export default function DashboardPage() {
             <h2 className="text-base font-black text-slate-950">High-Yield Priority Topics</h2>
           </CardHeader>
           <CardBody className="space-y-3 p-4">
-            {weakTopics().map((topic) => (
-              <div key={topic.id} className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
-                <div>
-                  <p className="text-xs font-bold text-slate-950">{topic.name}</p>
-                  <p className="text-[11px] text-slate-500">{topic.subjectName}</p>
+            {subjects
+              .flatMap((s) => s.topics.map((t) => ({ ...t, subjectId: s.id, subjectName: s.name, realMastery: masteryMap[t.id] ?? 0 })))
+              .sort((a, b) => a.realMastery - b.realMastery)
+              .slice(0, 5)
+              .map((topic) => (
+                <div key={topic.id} className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+                  <div>
+                    <p className="text-xs font-bold text-slate-950">{topic.name}</p>
+                    <p className="text-[11px] text-slate-500">{topic.subjectName}</p>
+                  </div>
+                  <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700">
+                    {topic.realMastery === 0 ? "Not started" : "Needs Review"}
+                  </span>
                 </div>
-                <span className="rounded-md bg-amber-50 px-2 py-1 text-xs font-bold text-amber-700">
-                  Needs Review
-                </span>
-              </div>
-            ))}
+              ))}
           </CardBody>
         </Card>
 
@@ -217,12 +240,11 @@ export default function DashboardPage() {
         </p>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-xs font-bold text-slate-500">— {dailyMsg?.sender ?? "Yume Nurse Study Team"}</span>
-          <Link
-            href="/admin"
-            className="text-xs font-bold text-sky-700 hover:text-sky-800 underline"
-          >
-            Edit in Admin Dashboard
-          </Link>
+          {isAdmin && (
+            <Link href="/admin" className="text-xs font-bold text-sky-700 hover:text-sky-800 underline">
+              Edit in Admin Dashboard
+            </Link>
+          )}
         </div>
       </div>
     </div>
