@@ -1,7 +1,211 @@
-Yume Nurse — Build Checklist & To-Do
+Yume Nurse — Build Checklist & Master Reference
 Last updated: 2026-08-14
-Project: https://nurse-yume.netlify.app
-GitHub: https://github.com/knoppixph/yume-nurse
+================================================================
+FOR USE WITH: Antigravity (AGY), ChatGPT Codex, or any AI tool
+================================================================
+
+
+========================================================
+PROJECT IDENTITY
+========================================================
+App Name         : Yume Nurse
+App Description  : Philippine nursing reviewer web app (NCLEX & PNLE)
+Primary User     : Filipino nursing students studying for board exams
+Admin Account    : juliusalas10@gmail.com
+Package Name     : yume-nurse
+Version          : 0.1.0
+
+
+========================================================
+LIVE URLS
+========================================================
+Production Site  : https://nurse-yume.netlify.app
+Login Page       : https://nurse-yume.netlify.app/login
+Admin CMS        : https://nurse-yume.netlify.app/admin
+GitHub Repo      : https://github.com/knoppixph/yume-nurse
+GitHub Org/User  : knoppixph
+Main Branch      : main
+
+
+========================================================
+LOCAL DEVELOPMENT
+========================================================
+Local URL        : http://localhost:3000
+Project Folder   : C:\Users\user\Desktop\nurse mate
+Start Dev Server : npm run dev  (or pnpm run dev)
+Build            : npm run build
+Type Check       : npm run typecheck
+Lint             : npm run lint
+Package Manager  : pnpm 11.19.0
+Node Version     : 22 (see .node-version and .nvmrc)
+
+
+========================================================
+TECH STACK
+========================================================
+Framework        : Next.js 16.3.0 (App Router, React Server Components)
+Language         : TypeScript 5
+UI Library       : React 19
+Styling          : Tailwind CSS 4 (Vanilla CSS utilities)
+Icons            : Lucide React 1.31.0
+Database/Auth    : Supabase (PostgreSQL + Supabase Auth)
+Deployment       : Netlify (with @netlify/plugin-nextjs)
+CI/CD            : GitHub → Netlify auto-deploy on push to main
+AI Features      : Built-in fallback database (no real API key yet)
+State (client)   : localStorage (gamification, mastery, daily message)
+State (server)   : Supabase Postgres (profiles, progress, settings)
+
+
+========================================================
+SUPABASE — DATABASE & AUTH
+========================================================
+Dashboard URL    : https://supabase.com/dashboard/project/efafvdcfbcwlhxdjozju
+SQL Editor       : https://supabase.com/dashboard/project/efafvdcfbcwlhxdjozju/sql/new
+Table Editor     : https://supabase.com/dashboard/project/efafvdcfbcwlhxdjozju/editor
+Auth Users       : https://supabase.com/dashboard/project/efafvdcfbcwlhxdjozju/auth/users
+Project ID       : efafvdcfbcwlhxdjozju
+Project Region   : (auto-assigned by Supabase)
+Organization     : knoppixph's Org
+
+--- Supabase Environment Variables ---
+NEXT_PUBLIC_SUPABASE_URL            = https://efafvdcfbcwlhxdjozju.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY       = sb_publishable_eU-L-rvuXtg9B4whlJg8zA_6wUc79tp
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY= sb_publishable_eU-L-rvuXtg9B4whlJg8zA_6wUc79tp
+
+NOTE: The anon/publishable key above is SAFE to expose client-side.
+      It is NOT a secret key. Never use the Supabase service_role key client-side.
+
+--- Supabase Tables (14 total) ---
+public.profiles            — User accounts and roles (student / admin)
+public.subjects            — Nursing subject areas
+public.topics              — Topics within each subject
+public.flashcards          — Flashcard content
+public.flashcard_progress  — Per-user flashcard mastery and spaced repetition
+public.questions           — Quiz questions (MCQ, T/F, SATA, Patient Scenario)
+public.question_options    — Answer options for each question
+public.quiz_attempts       — Each quiz session a student takes
+public.quiz_answers        — Each individual answer within an attempt
+public.study_sessions      — Pomodoro/study timer sessions
+public.study_materials     — Uploaded PDFs and study files
+public.study_streaks       — Daily study streak tracking
+public.ai_generations      — History of AI-generated content
+public.user_settings       — Per-user app settings (theme, goal, timer)
+
+--- Supabase Migration Files (run in order) ---
+1. supabase/migrations/202608140001_phase_3_schema.sql   — Creates all 14 tables
+2. supabase/migrations/202608140002_phase_11_rls_security.sql — Row Level Security policies
+3. supabase/migrations/202608140003_fix_profile_trigger.sql   — Auto-create profile trigger + admin role
+
+--- Set Admin Role (run after migrations) ---
+UPDATE public.profiles SET role = 'admin' WHERE email = 'juliusalas10@gmail.com';
+
+
+========================================================
+NETLIFY — HOSTING & DEPLOYMENT
+========================================================
+Dashboard        : https://app.netlify.com
+Site Name        : nurse-yume
+Production URL   : https://nurse-yume.netlify.app
+Deploy Branch    : main (auto-deploys on every git push)
+Build Command    : pnpm run build
+Publish Dir      : .next
+Plugin           : @netlify/plugin-nextjs
+
+--- Netlify Environment Variables (set in Netlify dashboard) ---
+NEXT_PUBLIC_SUPABASE_URL             = https://efafvdcfbcwlhxdjozju.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY        = sb_publishable_eU-L-rvuXtg9B4whlJg8zA_6wUc79tp
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = sb_publishable_eU-L-rvuXtg9B4whlJg8zA_6wUc79tp
+NODE_VERSION                         = 22
+PNPM_FLAGS                           = --no-frozen-lockfile
+
+
+========================================================
+GITHUB — SOURCE CONTROL
+========================================================
+Repo URL         : https://github.com/knoppixph/yume-nurse
+Owner            : knoppixph
+Default Branch   : main
+Auto-deploy      : Yes — every push to main triggers Netlify rebuild
+Clone command    : git clone https://github.com/knoppixph/yume-nurse.git
+
+
+========================================================
+AI FEATURES — CURRENT STATUS
+========================================================
+AI Provider      : NOT CONNECTED (using built-in fallback clinical database)
+AI Model Planned : OpenAI GPT-4o or Google Gemini
+Fallback System  : lib/services/ai.ts — structured 5-part clinical responses
+
+To enable REAL AI in the future, add this to Netlify env vars:
+OPENAI_API_KEY   = sk-xxxxxxxxxxxxxxxxxxxxxxxx   (get from platform.openai.com)
+
+Or for Google Gemini:
+GOOGLE_AI_API_KEY = AIza...  (get from aistudio.google.com)
+
+
+========================================================
+KEY SOURCE FILES — FOR CODEX / AI TOOLS
+========================================================
+Entry point      : app/layout.tsx
+Landing page     : app/page.tsx
+Dashboard        : app/dashboard/page.tsx
+Admin CMS        : app/admin/page.tsx
+Auth actions     : app/auth/actions.ts
+Auth callback    : app/auth/callback/route.ts
+Middleware       : middleware.ts (route protection)
+
+Core Libraries:
+  lib/study-data.ts          — All hardcoded subjects, topics, flashcards, quiz questions
+  lib/gamification.ts        — XP, levels, streaks, achievements (localStorage)
+  lib/user-progress.ts       — Per-user topic mastery tracking (localStorage)
+  lib/study-progress.ts      — Dashboard stats helpers
+  lib/admin-content.ts       — Daily motivational message (localStorage)
+  lib/admin-curriculum.ts    — Admin add/remove subjects (localStorage)
+  lib/auth/session.ts        — getCurrentUser, requireUser, ensureProfile
+  lib/auth/validation.ts     — Input sanitization, password checks
+  lib/supabase/client.ts     — Supabase browser client
+  lib/supabase/server.ts     — Supabase server client (for server actions)
+  lib/supabase/config.ts     — isSupabaseConfigured() check
+
+Key Components:
+  components/layout/app-shell.tsx     — Sidebar, mobile nav, header
+  components/quiz-center.tsx          — Full quiz engine
+  components/flashcard-review.tsx     — Flashcard flip + spaced repetition
+  components/study-timer.tsx          — Pomodoro timer + XP tracking
+  components/subject-card.tsx         — Subject card with real mastery
+  components/materials-uploader.tsx   — File upload UI
+
+Types:
+  types/study.ts             — Subject, Topic, Flashcard, QuizQuestion types
+  types/database.ts          — Supabase generated database types
+
+
+========================================================
+USER ROLES
+========================================================
+student  — Default role for all new signups. Can access all study features.
+           Cannot access /admin page.
+
+admin    — Set manually in Supabase profiles table.
+           Can access /admin CMS, manage content, see all user stats.
+           Admin nav link only shows in sidebar for admin accounts.
+
+To promote a user to admin:
+  UPDATE public.profiles SET role = 'admin' WHERE email = 'user@email.com';
+
+
+========================================================
+localStorage KEYS (browser storage — per device)
+========================================================
+yumenurse_gamification_v2   — XP, streak, study minutes, achievements
+yumenurse_topic_mastery_v1  — Per-topic mastery % (0–100)
+yumenurse_curriculum_v1     — Admin-added/hidden subjects
+yumenurse_daily_message_v1  — Admin custom daily message
+nursemate_quiz_mistake_bank  — Missed quiz questions for review
+nursemate_quiz_history       — Recent quiz attempt history
+
+
+
 
 ========================================================
 COMPLETED — PHASES 0–12 ✅
