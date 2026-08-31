@@ -47,6 +47,17 @@ export function sanitizeClientError(error: unknown, fallbackMessage = "An unexpe
 
   const msg = error instanceof Error ? error.message : typeof error === "string" ? error : "";
 
+  // Handle connection and network errors
+  if (
+    msg.toLowerCase().includes("fetch failed") ||
+    msg.toLowerCase().includes("failed to fetch") ||
+    msg.includes("ENOTFOUND") ||
+    msg.includes("ECONNREFUSED") ||
+    msg.includes("UND_ERR_CONNECT_TIMEOUT")
+  ) {
+    return "Unable to connect to the authentication server. Please check your Supabase connection/configuration in .env.local, or click 'Continue in local demo' below.";
+  }
+
   // Filter out internal SQL, connection strings, or system paths
   if (
     msg.includes("violates foreign key") ||
@@ -54,7 +65,6 @@ export function sanitizeClientError(error: unknown, fallbackMessage = "An unexpe
     msg.includes("relation") ||
     msg.includes("column") ||
     msg.includes("supabase.co") ||
-    msg.includes("ECONNREFUSED") ||
     msg.includes("PGRST") ||
     msg.includes("JWT")
   ) {
