@@ -23,6 +23,8 @@ import { Select } from "@/components/ui/select";
 import { subjects } from "@/lib/study-data";
 import { validateFileUpload } from "@/lib/auth/validation";
 import { cn } from "@/lib/utils";
+import { MaterialStudyModal } from "@/components/material-study-modal";
+import { buildMaterialStudySet, type MaterialStudySet } from "@/services/material-study-pack";
 
 export type StudyMaterial = {
   id: string;
@@ -179,6 +181,8 @@ export function MaterialsManager() {
   const [isUploading, setIsUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [studySet, setStudySet] = useState<MaterialStudySet | null>(null);
+  const [studyMode, setStudyMode] = useState<"quiz" | "flashcards" | null>(null);
 
   // Load hidden default items from localStorage
   useEffect(() => {
@@ -219,8 +223,18 @@ export function MaterialsManager() {
       }
 
       if (data) {
+        // Sync any stock guides hidden by either account
+        const dbHidden = data
+          .filter((r) => r.storage_path.startsWith("hidden-stock-"))
+          .map((r) => r.storage_path.replace("hidden-stock-", ""));
+        if (dbHidden.length > 0) {
+          setHiddenDefaultIds((prev) => Array.from(new Set([...prev, ...dbHidden])));
+        }
+
+        const realRows = data.filter((r) => !r.storage_path.startsWith("hidden-stock-"));
+
         const loaded: StudyMaterial[] = await Promise.all(
-          data.map(async (row) => {
+          realRows.map(async (row) => {
             let fileUrl = "#";
             try {
               const { data: publicUrlData } = supabase.storage
@@ -461,6 +475,67 @@ export function MaterialsManager() {
     }
   }
 
+  // Open interactive quiz for this specific material
+  function handleOpenQuiz(material: StudyMaterial) {
+    const set = buildMaterialStudySet(
+      material.id,
+      material.title,
+      material.topics,
+      material.subject
+    );
+    setStudySet(set);
+    setStudyMode("quiz");
+  }
+
+  // Open interactive flashcards for this specific material
+  function handleOpenFlashcards(material: StudyMaterial) {
+    const set = buildMaterialStudySet(
+      material.id,
+      material.title,
+      material.topics,
+      material.subject
+    );
+    setStudySet(set);
+    setStudyMode("flashcards");
+  }
+
+  // Remove all stock default guides at once
+  async function handleRemoveAllStock() {
+    const confirmRemove = window.confirm(
+      "Remove all default stock guides so only your uploaded files remain in the library?"
+    );
+    if (!confirmRemove) return;
+
+    const allStockIds = DEFAULT_MATERIALS.map((m) => m.id);
+    setHiddenDefaultIds(allStockIds);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(HIDDEN_DEFAULTS_KEY, JSON.stringify(allStockIds));
+    }
+
+    try {
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const inserts = DEFAULT_MATERIALS.map((m) => ({
+        owner_id: user?.id ?? null,
+        title: `HIDDEN_STOCK:${m.id}`,
+        file_name: m.filename,
+        storage_bucket: "study-materials",
+        storage_path: `hidden-stock-${m.id}`,
+        mime_type: "text/plain",
+        file_size_bytes: 1,
+        visibility: "public" as const,
+      }));
+
+      await supabase.from("study_materials").upsert(inserts, { onConflict: "storage_path" });
+    } catch (err) {
+      console.warn("Non-blocking remove stock note:", err);
+    }
+
+    setSuccess("All stock guides removed! Only your uploaded files now appear in your library.");
+  }
+
   // Remove uploaded or default material
   async function handleRemove(material: StudyMaterial) {
     const confirmRemove = window.confirm(
@@ -471,15 +546,34 @@ export function MaterialsManager() {
     setDeletingId(material.id);
     setError(null);
 
-    // If it's a default preloaded material, hide it from view
+    // If it's a default preloaded material, hide it and sync to DB across accounts
     if (!material.isCustom) {
       const nextHidden = [...hiddenDefaultIds, material.id];
       setHiddenDefaultIds(nextHidden);
       if (typeof window !== "undefined") {
         localStorage.setItem(HIDDEN_DEFAULTS_KEY, JSON.stringify(nextHidden));
       }
+
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        await supabase.from("study_materials").insert({
+          owner_id: user?.id ?? null,
+          title: `HIDDEN_STOCK:${material.id}`,
+          file_name: material.filename,
+          storage_bucket: "study-materials",
+          storage_path: `hidden-stock-${material.id}`,
+          mime_type: "text/plain",
+          file_size_bytes: 1,
+          visibility: "public",
+        });
+      } catch (err) {
+        console.warn("Non-blocking hidden stock note:", err);
+      }
+
       setDeletingId(null);
-      setSuccess(`"${material.title}" removed from your library.`);
+      setSuccess(`"${material.title}" removed from your study library.`);
       return;
     }
 
@@ -662,7 +756,17 @@ export function MaterialsManager() {
                 <RefreshCw className={cn("h-3.5 w-3.5", isLoading && "animate-spin")} />
               </button>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {visibleDefaults.length > 0 && (
+                <button
+                  onClick={handleRemoveAllStock}
+                  className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition"
+                  title="Remove all default stock guides so only your uploads appear"
+                >
+                  <Trash2 className="h-3 w-3 text-rose-500" />
+                  <span>Remove All Stock Files ({visibleDefaults.length})</span>
+                </button>
+              )}
               {hiddenDefaultIds.length > 0 && (
                 <button
                   onClick={handleRestoreDefaults}
@@ -739,20 +843,22 @@ export function MaterialsManager() {
                     View File
                   </a>
                 ) : null}
-                <Link
-                  href={`/quiz?subject=${material.subjectId}`}
+                <button
+                  type="button"
+                  onClick={() => handleOpenQuiz(material)}
                   className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700"
                 >
                   <Sparkles className="h-4 w-4" />
                   Practice Quiz
-                </Link>
-                <Link
-                  href={`/flashcards?subject=${material.subjectId}`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleOpenFlashcards(material)}
                   className="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-sky-700"
                 >
                   <BookOpen className="h-4 w-4" />
                   Flashcards
-                </Link>
+                </button>
                 <button
                   type="button"
                   onClick={() => handleRemove(material)}
@@ -768,6 +874,18 @@ export function MaterialsManager() {
           ))}
         </CardBody>
       </Card>
+
+      {/* Interactive Practice Quiz & Flashcard Modal */}
+      {studyMode && studySet && (
+        <MaterialStudyModal
+          studySet={studySet}
+          initialMode={studyMode}
+          onClose={() => {
+            setStudyMode(null);
+            setStudySet(null);
+          }}
+        />
+      )}
     </div>
   );
 }
