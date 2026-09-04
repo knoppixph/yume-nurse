@@ -14,9 +14,12 @@ import {
   Home,
   Layers3,
   LogOut,
+  Menu,
   ShieldCheck,
   Sparkles,
+  Upload,
   UserRound,
+  X,
 } from "lucide-react";
 import { logoutAction } from "@/app/auth/actions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -37,9 +40,13 @@ const studentNavItems = [
   { href: "/profile", label: "Profile", icon: UserRound },
 ];
 
-const mobileItems = studentNavItems.filter((item) =>
-  ["/dashboard", "/review", "/quiz", "/progress", "/profile"].includes(item.href),
-);
+const mobileItems = [
+  { href: "/dashboard", label: "Dashboard", icon: Home },
+  { href: "/materials", label: "Materials", icon: FileText },
+  { href: "/quiz", label: "Quizzes", icon: GraduationCap },
+  { href: "/flashcards", label: "Flashcards", icon: BookOpen },
+  { href: "/profile", label: "Profile", icon: UserRound },
+];
 
 const plainRoutes = ["/", "/login", "/signup", "/forgot-password", "/reset-password"];
 
@@ -52,6 +59,11 @@ export function AppShell({ children }: AppShellProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [streak, setStreak] = useState(0);
   const [dailyMsg, setDailyMsg] = useState("Keep going, future nurse. One topic at a time. You have got this.");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     // Load streak from gamification state
@@ -157,13 +169,78 @@ export function AppShell({ children }: AppShellProps) {
             </span>
             <span className="text-base font-black text-slate-950">Yume Nurse</span>
           </Link>
-          {streak > 0 && (
-            <span className="flex items-center gap-1 rounded-md bg-teal-50 px-2 py-1 text-xs font-bold text-teal-700">
-              <Flame className="h-3 w-3 text-teal-600" />
-              {streak} day streak
-            </span>
-          )}
+
+          <div className="flex items-center gap-2">
+            <Link
+              href="/materials"
+              className="flex items-center gap-1.5 rounded-lg bg-teal-600 px-2.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-teal-700"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              <span>Upload</span>
+            </Link>
+
+            {streak > 0 && (
+              <span className="hidden xs:flex sm:flex items-center gap-1 rounded-md bg-teal-50 px-2 py-1 text-xs font-bold text-teal-700">
+                <Flame className="h-3 w-3 text-teal-600" />
+                {streak}d
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+              aria-label="Toggle mobile menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Expandable Menu Drawer */}
+        {mobileMenuOpen && (
+          <div className="mt-3 space-y-1 border-t border-slate-100 pt-3 max-h-[70vh] overflow-y-auto">
+            <p className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">Navigation Menu</p>
+            {navItems.map((item) => {
+              const active = pathname === item.href;
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-semibold transition",
+                    active
+                      ? "bg-slate-950 text-white"
+                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
+                    item.href === "/materials" && !active && "text-teal-700 font-bold bg-teal-50/60",
+                    item.href === "/admin" && !active && "text-amber-700 hover:bg-amber-50"
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                  {item.href === "/materials" && (
+                    <span className="ml-auto rounded bg-teal-100 px-1.5 py-0.5 text-[10px] font-bold text-teal-800">
+                      Upload
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+            <div className="border-t border-slate-100 pt-3 pb-1">
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  className="flex min-h-10 w-full items-center gap-3 rounded-lg px-3 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Log out</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="pb-24 lg:pl-72">
