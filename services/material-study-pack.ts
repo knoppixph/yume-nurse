@@ -391,6 +391,468 @@ const BASE_NDT_TEMPLATES = [
   }
 ];
 
+type TemplateItem = {
+  topic: string;
+  q: string;
+  correct: string;
+  wrongs: string[];
+  explanation: string;
+  diff: "Easy" | "Medium" | "Hard";
+};
+
+export const BASE_COMMUNITY_HEALTH_TEMPLATES: TemplateItem[] = [
+  {
+    topic: "Public Health Definition (Winslow 3Ps)",
+    q: "According to C.E. Winslow, what are the three fundamental pillars (3Ps) of Public Health?",
+    correct: "Preventing disease, Prolonging life, and Promoting health through organized community efforts",
+    wrongs: [
+      "Prescribing drugs, Performing surgery, and Providing tertiary inpatient beds",
+      "Paying fees, Procuring insurance, and Protecting private hospital assets",
+      "Policing clinics, Prosecuting infractions, and Promoting herbal remedies"
+    ],
+    explanation: "C.E. Winslow's classical definition emphasizes societal organization to prevent disease, prolong life, and promote health.",
+    diff: "Easy",
+  },
+  {
+    topic: "Community Health Nursing Definition (Maglaya)",
+    q: "How did Araceli S. Maglaya define Community Health Nursing in Philippine practice?",
+    correct: "The utilization of the nursing process in the different levels of clientele — individuals, families, population groups, and communities",
+    wrongs: [
+      "Exclusive bedside clinical nursing performed in intensive care units",
+      "The administration of private health insurance policies to rural residents",
+      "A theoretical discipline focused solely on microbiological laboratory research"
+    ],
+    explanation: "Maglaya's definition focuses on the nursing process applied across all clientele levels to promote health and prevent disease.",
+    diff: "Medium",
+  },
+  {
+    topic: "Primary Health Care Legal Basis (LOI 949)",
+    q: "What is the primary legal basis that mandated the adoption of Primary Health Care (PHC) in the Philippines?",
+    correct: "Letter of Instruction (LOI) 949, signed on October 19, 1979",
+    wrongs: [
+      "Republic Act 9173 (Philippine Nursing Act of 2002)",
+      "Republic Act 7160 (Local Government Code of 1991)",
+      "Presidential Decree 856 (Code on Sanitation)"
+    ],
+    explanation: "LOI 949 instructed the Department of Health to adopt Primary Health Care following the 1978 Alma-Ata Declaration.",
+    diff: "Easy",
+  },
+  {
+    topic: "Core of Primary Health Care",
+    q: "In Primary Health Care, which principle is recognized as the 'heart and soul' of sustainable health development?",
+    correct: "Community Participation and empowerment toward self-reliance",
+    wrongs: [
+      "Importing advanced robotic surgery suites to provincial centers",
+      "Centralized top-down control by metropolitan authorities",
+      "Mandatory privatization of all barangay health stations"
+    ],
+    explanation: "Community participation empowers local leaders and families to plan and sustain their own health programs.",
+    diff: "Easy",
+  },
+  {
+    topic: "The 4 A's of PHC Health Services",
+    q: "What are the four 'A's of health services under the Primary Health Care philosophy?",
+    correct: "Accessibility, Availability, Affordability, and Acceptability (plus Appropriateness)",
+    wrongs: [
+      "Accountability, Antibiotics, Anesthesia, and Administration",
+      "Accuracy, Aggressiveness, Agility, and Automation",
+      "Ascertainment, Allocation, Acquisition, and Adjudication"
+    ],
+    explanation: "Services must be physically reachable (accessible), present when needed (available), economically feasible (affordable), and culturally sound (acceptable).",
+    diff: "Medium",
+  },
+  {
+    topic: "Healthcare Delivery Levels in the Philippines",
+    q: "Under the Philippine healthcare delivery system, which facility is the primary entry point in the community?",
+    correct: "Barangay Health Station (BHS) and Rural Health Unit (RHU)",
+    wrongs: [
+      "Philippine General Hospital (PGH) Tertiary Center",
+      "Philippine Heart Center (PHC) Specialty Hospital",
+      "Provincial and Regional Tertiary Medical Centers"
+    ],
+    explanation: "Frontline primary care in the Philippines is anchored by the Barangay Health Station (BHS) and Rural Health Unit (RHU).",
+    diff: "Easy",
+  },
+  {
+    topic: "Generics Act of 1988 (RA 6675)",
+    q: "What is the primary public health objective of Republic Act 6675 (The Generics Act of 1988)?",
+    correct: "Promoting and ensuring the availability of adequate, affordable, and safe generic drugs to all Filipinos",
+    wrongs: [
+      "Mandating the use of only foreign brand-name medications in all clinics",
+      "Prohibiting government health units from dispensing essential medicines",
+      "Restricting medication sales strictly to tertiary private hospitals"
+    ],
+    explanation: "RA 6675 ensures affordable generic essential medicines are stocked and prescribed in public and private facilities.",
+    diff: "Medium",
+  },
+  {
+    topic: "Expanded Program on Immunization (EPI)",
+    q: "Under Philippine DOH EPI guidelines, which vaccine is administered intradermally at birth or first contact?",
+    correct: "BCG vaccine (Bacillus Calmette-Guérin) at 0.05 mL into the right deltoid",
+    wrongs: [
+      "Hepatitis B vaccine via deep intravenous infusion",
+      "Oral Polio Vaccine administered intramuscularly",
+      "Measles-Rubella vaccine given orally at 1 month of age"
+    ],
+    explanation: "BCG is given intradermally (0.05 mL) in the right deltoid at birth to protect infants from severe disseminated TB.",
+    diff: "Medium",
+  }
+];
+
+export const BASE_FUNDAMENTALS_TEMPLATES: TemplateItem[] = [
+  {
+    topic: "The Nursing Process (ADPIE)",
+    q: "A nurse completes an initial physical assessment and clusters client cues to formulate clinical judgments. Which phase of the nursing process is being executed?",
+    correct: "Diagnosis (Analysis of client data)",
+    wrongs: [
+      "Implementation (Direct bedside interventions)",
+      "Evaluation (Measuring outcome criteria)",
+      "Planning (Setting SMART client goals)"
+    ],
+    explanation: "Diagnosis interprets assessment cues to identify patient problems and formulate nursing diagnoses.",
+    diff: "Easy",
+  },
+  {
+    topic: "Blood Pressure Measurement Technique",
+    q: "A nursing student measures blood pressure using a cuff that is too narrow for the client's upper arm circumference. What error will occur?",
+    correct: "The blood pressure reading will be falsely elevated (falsely high)",
+    wrongs: [
+      "The blood pressure reading will be falsely depressed (falsely low)",
+      "The systolic reading will be zero while diastolic is elevated",
+      "The cuff size has zero physical effect on sphygmomanometer readings"
+    ],
+    explanation: "A narrow cuff requires excessive pneumatic pressure to occlude the brachial artery, causing falsely high readings.",
+    diff: "Medium",
+  },
+  {
+    topic: "Personal Protective Equipment (PPE) Donning Sequence",
+    q: "What is the correct CDC sequence for DONNING PPE before entering an isolation room?",
+    correct: "1. Gown -> 2. Mask/Respirator -> 3. Goggles/Face Shield -> 4. Gloves",
+    wrongs: [
+      "1. Gloves -> 2. Gown -> 3. Mask -> 4. Face Shield",
+      "1. Mask -> 2. Gloves -> 3. Gown -> 4. Goggles",
+      "1. Goggles -> 2. Gown -> 3. Gloves -> 4. Mask"
+    ],
+    explanation: "Donning sequence: Gown first, then facial protection (mask, eyewear), and gloves pulled over the gown wrists last.",
+    diff: "Easy",
+  },
+  {
+    topic: "Healthcare Fire Safety (RACE Protocol)",
+    q: "A staff nurse discovers a wastebasket fire in a patient room. What is the immediate first action according to the RACE protocol?",
+    correct: "Rescue and remove any clients in immediate physical danger",
+    wrongs: [
+      "Activate the fire alarm pull station and alert the switchboard",
+      "Close all room doors and windows to contain smoke",
+      "Discharge a chemical fire extinguisher onto the flames"
+    ],
+    explanation: "RACE: Rescue patients first; Alarm second; Contain fire/smoke third; Extinguish/Evacuate fourth.",
+    diff: "Easy",
+  },
+  {
+    topic: "Transmission-Based Airborne Precautions",
+    q: "A client is admitted with active Pulmonary Tuberculosis. Which infection control measure is mandatory?",
+    correct: "Negative-pressure airborne isolation room and N95 (or higher) particulate respirator for healthcare workers",
+    wrongs: [
+      "Standard surgical mask and keeping the patient door wide open",
+      "Placing the client in a positive-pressure room with standard droplet precautions",
+      "Contact precautions only with no respiratory protection required"
+    ],
+    explanation: "Airborne precautions (negative airflow room and N95 mask) prevent inhalation of infectious droplet nuclei.",
+    diff: "Medium",
+  }
+];
+
+export const BASE_PHARMACOLOGY_TEMPLATES: TemplateItem[] = [
+  {
+    topic: "Ten Rights of Medication Administration",
+    q: "A nurse checks the medication administration record (MAR) and identifies the patient using two unique identifiers. Which core safety principle is being fulfilled?",
+    correct: "Right Client, Right Medication, and Right Dose verification",
+    wrongs: [
+      "Right Financial Insurance Coverage",
+      "Right Prescription Expiration Negotiation",
+      "Right Pharmacist Signature Verification"
+    ],
+    explanation: "Verifying identity with two identifiers ensures the right patient receives the correctly prescribed drug and dose.",
+    diff: "Easy",
+  },
+  {
+    topic: "High-Alert IV Potassium Safety",
+    q: "A physician writes an order for 'Potassium Chloride 20 mEq IV push stat'. What is the nurse's essential action?",
+    correct: "Immediately withhold the medication and clarify the order; IV push potassium causes instant cardiac arrest and is never given IV push",
+    wrongs: [
+      "Administer the IV push over 30 seconds into a large bore peripheral line",
+      "Dilute in 5 mL normal saline and push rapidly through a central venous line",
+      "Administer via gravity drip without an electronic infusion pump"
+    ],
+    explanation: "Direct IV push potassium stops the heart instantly. Potassium must always be diluted and infused slowly via pump.",
+    diff: "Hard",
+  },
+  {
+    topic: "Opioid Antidote (Naloxone)",
+    q: "A client receiving IV morphine for severe pain has a respiratory rate of 6 breaths/min and is unarousable. What is the priority antidote?",
+    correct: "Naloxone (Narcan) administered intravenously in titrated doses",
+    wrongs: [
+      "Flumazenil (Romazicon)",
+      "Protamine Sulfate",
+      "Calcium Gluconate 10%"
+    ],
+    explanation: "Naloxone is the pure competitive opioid receptor antagonist that reverses life-threatening opioid respiratory depression.",
+    diff: "Easy",
+  },
+  {
+    topic: "Heparin Antidote (Protamine Sulfate)",
+    q: "A client on continuous IV Heparin infusion presents with severe epistaxis, hematuria, and an aPTT > 150 seconds. What is the specific antidote?",
+    correct: "Protamine Sulfate administered slowly IV",
+    wrongs: [
+      "Phytonadione (Vitamin K1)",
+      "Deferoxamine",
+      "Acetylcysteine (Mucomyst)"
+    ],
+    explanation: "Protamine sulfate binds and neutralizes heparin. Vitamin K reverses warfarin, not heparin.",
+    diff: "Medium",
+  },
+  {
+    topic: "Digoxin Bradycardia Parameter",
+    q: "Prior to administering oral Digoxin, the nurse auscultates the apical pulse for 1 full minute and finds a rate of 52 bpm. What is the appropriate nursing action?",
+    correct: "Withhold the dose, document the heart rate, and notify the health care provider immediately",
+    wrongs: [
+      "Administer double the prescribed dose to stimulate the sinoatrial node",
+      "Give the dose with orange juice and reassess pulse in 8 hours",
+      "Instruct the client to perform vigorous jumping jacks before taking the pill"
+    ],
+    explanation: "In adults, hold digoxin if apical pulse is <60 bpm due to risk of fatal bradycardia or complete AV heart block.",
+    diff: "Medium",
+  }
+];
+
+export const BASE_MED_SURG_TEMPLATES: TemplateItem[] = [
+  {
+    topic: "Postoperative Atelectasis Prevention",
+    q: "A client on postoperative day 1 following abdominal surgery has shallow breathing and crackles at lung bases. What is the priority nursing intervention?",
+    correct: "Assist client into semi-Fowler position, encourage incentive spirometry (10x/hr), and guide splinted deep breathing/coughing",
+    wrongs: [
+      "Administer high-dose sedatives and place client in complete supine flat position",
+      "Restrict fluids to 500 mL/day to avoid fluid accumulation in alveoli",
+      "Instruct client to avoid all movement and coughing for 5 days"
+    ],
+    explanation: "Incentive spirometry expands collapsed alveoli and clears pulmonary secretions to prevent atelectasis and pneumonia.",
+    diff: "Easy",
+  },
+  {
+    topic: "Myocardial Infarction Emergency Management (MONA)",
+    q: "A client presents to the emergency department with crushing substernal chest pain radiating to the left arm. What is the classic initial pharmacological sequence (MONA)?",
+    correct: "Morphine, Oxygen (if SpO2 < 90%), Nitroglycerin, and Aspirin (chewed 162-325 mg)",
+    wrongs: [
+      "Metoprolol, Omeprazole, Naloxone, and Ampicillin",
+      "Mannitol, Ondansetron, Neostigmine, and Atropine",
+      "Midazolam, Oxytocin, Nifedipine, and Acetaminophen"
+    ],
+    explanation: "MONA: Aspirin inhibits platelet aggregation; Nitroglycerin dilates coronaries; Oxygen relieves hypoxia; Morphine eases pain and preload.",
+    diff: "Medium",
+  },
+  {
+    topic: "Diabetic Ketoacidosis Resuscitation Priority",
+    q: "A Type 1 diabetic presents with Kussmaul breathing, blood glucose of 480 mg/dL, and arterial pH 7.20. What is the initial resuscitation priority?",
+    correct: "Rapid IV infusion of 0.9% Normal Saline for volume expansion, followed by regular insulin infusion",
+    wrongs: [
+      "Subcutaneous NPH insulin bolus with rapid oral potassium tablets",
+      "IV infusion of 50% Dextrose followed by fluid restriction",
+      "Immediate oral intake of large volumes of concentrated fruit punch"
+    ],
+    explanation: "Severe osmotic diuresis depletes circulating volume; isotonic saline restores vascular perfusion and protects renal function.",
+    diff: "Hard",
+  }
+];
+
+export const BASE_MATERNAL_TEMPLATES: TemplateItem[] = [
+  {
+    topic: "Naegele's Rule EDD Calculation",
+    q: "A pregnant client reports the first day of her Last Menstrual Period (LMP) was March 10, 2026. Applying Naegele's rule, what is her Estimated Date of Delivery (EDD)?",
+    correct: "December 17, 2026 (Subtract 3 months, Add 7 days, Add 1 year)",
+    wrongs: [
+      "January 10, 2027",
+      "November 17, 2026",
+      "October 3, 2026"
+    ],
+    explanation: "Naegele's Rule: LMP minus 3 months (March - 3 = Dec), plus 7 days (10 + 7 = 17), plus 1 year = Dec 17, 2026.",
+    diff: "Easy",
+  },
+  {
+    topic: "Postpartum Hemorrhage Priority Action",
+    q: "Two hours postpartum, the nurse assesses the fundus and finds it soft, boggy, and displaced to the right with heavy lochia rubra. What is the immediate first action?",
+    correct: "Firmly massage the uterine fundus until firm to stimulate uterine muscle contraction and control bleeding",
+    wrongs: [
+      "Immediately prepare the client for an emergency hysterectomy without palpating",
+      "Administer high-dose bolus IV morphine to relax the myometrium",
+      "Leave the room to locate the attending obstetrician"
+    ],
+    explanation: "Uterine atony is the leading cause of postpartum hemorrhage. Fundal massage contracts myometrial fibers around bleeding vessels.",
+    diff: "Easy",
+  },
+  {
+    topic: "Newborn APGAR Scoring",
+    q: "At 1 minute, a newborn has heart rate 110 bpm (2), vigorous cry (2), active motion (2), grimace on suctioning (2), but hands and feet are cyanotic with pink body (1). What is the score?",
+    correct: "APGAR 9 (Deduct 1 point for acrocyanosis under Appearance)",
+    wrongs: [
+      "APGAR 10 (Completely flawless transition)",
+      "APGAR 6 (Moderate infant depression requiring CPR)",
+      "APGAR 4 (Severe neonatal asphyxia)"
+    ],
+    explanation: "Acrocyanosis (blue hands/feet with pink body) is normal in early transition and yields 1 point for Appearance (total 9).",
+    diff: "Medium",
+  }
+];
+
+export const BASE_PSYCHIATRIC_TEMPLATES: TemplateItem[] = [
+  {
+    topic: "Therapeutic Communication & Suicide Assessment",
+    q: "A depressed client states, 'No one cares about me anymore. Everyone would be better off if I were dead.' What is the most therapeutic nursing response?",
+    correct: "'It sounds like you are feeling overwhelmed and hopeless right now. Are you thinking about hurting or killing yourself?'",
+    wrongs: [
+      "'Don\\'t talk like that, everyone has bad days and you have so much to live for!'",
+      "'You shouldn\\'t feel sad when so many people have it worse than you.'",
+      "'Let\\'s not dwell on negative thoughts; why don\\'t we go watch television?'"
+    ],
+    explanation: "Direct, empathetic inquiry about suicidal intent evaluates imminent lethality without increasing risk.",
+    diff: "Medium",
+  },
+  {
+    topic: "Lithium Carbonate Dietary Sodium Safety",
+    q: "A client with Bipolar disorder is prescribed Lithium Carbonate. What crucial dietary instruction must the nurse provide?",
+    correct: "Maintain consistent dietary sodium and fluid intake (2-3 L/day); sodium depletion causes dangerous lithium accumulation",
+    wrongs: [
+      "Strictly eliminate all salt and sodium from meals to lower blood pressure",
+      "Limit daily fluid intake to under 500 mL to concentrate therapeutic lithium",
+      "Double the lithium dose whenever mild diarrhea or excessive sweating occurs"
+    ],
+    explanation: "Renal tubules excrete lithium competitively with sodium. Hyponatremia leads to reduced lithium clearance and severe toxicity.",
+    diff: "Hard",
+  }
+];
+
+export const BASE_ANATOMY_TEMPLATES: TemplateItem[] = [
+  {
+    topic: "Cardiac Conduction Primary Pacemaker",
+    q: "Which specialized tissue in the right atrium generates spontaneous impulses at 60-100 bpm and serves as the primary cardiac pacemaker?",
+    correct: "The Sinoatrial (SA) Node",
+    wrongs: [
+      "The Atrioventricular (AV) Node",
+      "The Bundle of His",
+      "The Purkinje fibers"
+    ],
+    explanation: "The SA node in the superior posterolateral wall of the right atrium is the natural pacemaker of the heart.",
+    diff: "Easy",
+  },
+  {
+    topic: "Pulmonary Gas Diffusion Mechanism",
+    q: "By which physiological mechanism do oxygen and carbon dioxide cross the alveolar-capillary membrane in the lungs?",
+    correct: "Simple passive diffusion down partial pressure concentration gradients",
+    wrongs: [
+      "Active transport requiring cellular ATP expenditure",
+      "Receptor-mediated endocytosis into red blood cells",
+      "Facilitated diffusion via transmembrane glucose transporters"
+    ],
+    explanation: "Gas exchange across thin alveolar walls occurs passively along partial pressure gradients without energy consumption.",
+    diff: "Easy",
+  }
+];
+
+export function getTemplatesForSubject(
+  subject: string = "",
+  title: string = "",
+  topics: string = ""
+): { templates: TemplateItem[]; resolvedSubject: string } {
+  const combined = `${subject} ${title} ${topics}`.toLowerCase();
+
+  if (
+    combined.includes("ndt") ||
+    combined.includes("nutri") ||
+    combined.includes("diet") ||
+    combined.includes("food") ||
+    combined.includes("feed") ||
+    combined.includes("tpn") ||
+    combined.includes("vitamin")
+  ) {
+    return { templates: BASE_NDT_TEMPLATES, resolvedSubject: "Nutrition and Diet Therapy (NDT)" };
+  }
+
+  if (
+    combined.includes("communit") ||
+    combined.includes("phc") ||
+    combined.includes("chn") ||
+    combined.includes("bhw") ||
+    combined.includes("public health") ||
+    combined.includes("winslow") ||
+    combined.includes("maglaya")
+  ) {
+    return { templates: BASE_COMMUNITY_HEALTH_TEMPLATES, resolvedSubject: "Community Health Nursing (Philippines)" };
+  }
+
+  if (
+    combined.includes("pharm") ||
+    combined.includes("drug") ||
+    combined.includes("medication") ||
+    combined.includes("dosage") ||
+    combined.includes("antidote")
+  ) {
+    return { templates: BASE_PHARMACOLOGY_TEMPLATES, resolvedSubject: "Pharmacology" };
+  }
+
+  if (
+    combined.includes("med-surg") ||
+    combined.includes("medical-surgical") ||
+    combined.includes("surgery") ||
+    combined.includes("cardiac") ||
+    combined.includes("postop") ||
+    combined.includes("dka")
+  ) {
+    return { templates: BASE_MED_SURG_TEMPLATES, resolvedSubject: "Medical-Surgical Nursing" };
+  }
+
+  if (
+    combined.includes("maternal") ||
+    combined.includes("child") ||
+    combined.includes("obstetric") ||
+    combined.includes("newborn") ||
+    combined.includes("apgar") ||
+    combined.includes("labor") ||
+    combined.includes("postpartum")
+  ) {
+    return { templates: BASE_MATERNAL_TEMPLATES, resolvedSubject: "Maternal and Child Nursing" };
+  }
+
+  if (
+    combined.includes("psych") ||
+    combined.includes("mental") ||
+    combined.includes("depression") ||
+    combined.includes("bipolar") ||
+    combined.includes("lithium") ||
+    combined.includes("suicide")
+  ) {
+    return { templates: BASE_PSYCHIATRIC_TEMPLATES, resolvedSubject: "Psychiatric Nursing" };
+  }
+
+  if (
+    combined.includes("anatomy") ||
+    combined.includes("physiol") ||
+    combined.includes("pacemaker")
+  ) {
+    return { templates: BASE_ANATOMY_TEMPLATES, resolvedSubject: "Anatomy and Physiology" };
+  }
+
+  if (
+    combined.includes("fundament") ||
+    combined.includes("adpie") ||
+    combined.includes("vitals") ||
+    combined.includes("ppe") ||
+    combined.includes("race")
+  ) {
+    return { templates: BASE_FUNDAMENTALS_TEMPLATES, resolvedSubject: "Fundamentals of Nursing" };
+  }
+
+  return { templates: BASE_NDT_TEMPLATES, resolvedSubject: "Nutrition and Diet Therapy (NDT)" };
+}
+
 /**
  * Procedural Question Bank Builder
  * Can generate 50, 100, 200, or unlimited distinct questions by combining clinical stems,
@@ -399,10 +861,12 @@ const BASE_NDT_TEMPLATES = [
 export function generateQuestionBank(
   materialId: string,
   title: string,
-  count: number = 100
+  count: number = 100,
+  subject: string = "",
+  topics: string = ""
 ): CustomQuizQuestion[] {
   const result: CustomQuizQuestion[] = [];
-  const templates = BASE_NDT_TEMPLATES;
+  const { templates } = getTemplatesForSubject(subject, title, topics);
 
   // Clinical client variations for procedural generation
   const patientProfiles = [
@@ -463,10 +927,13 @@ export function generateQuestionBank(
  */
 export function generateFlashcardBank(
   materialId: string,
-  count: number = 60
+  count: number = 60,
+  title: string = "",
+  subject: string = "",
+  topics: string = ""
 ): CustomFlashcard[] {
   const result: CustomFlashcard[] = [];
-  const templates = BASE_NDT_TEMPLATES;
+  const { templates } = getTemplatesForSubject(subject, title, topics);
 
   for (let i = 0; i < count; i++) {
     const base = templates[i % templates.length];
@@ -482,7 +949,7 @@ export function generateFlashcardBank(
       front = `NCLEX Question Stem: ${base.q}`;
       back = `Core Action: ${base.correct}`;
     } else {
-      front = `Dietary Intervention for: ${base.topic}`;
+      front = `Clinical Guidance for: ${base.topic}`;
       back = `${base.correct}`;
     }
 
@@ -507,18 +974,19 @@ export function buildMaterialStudySet(
   materialId: string,
   title: string,
   topics: string = "",
-  subject: string = "General Nursing"
+  subject: string = ""
 ): MaterialStudySet {
   const cleanTitle = title.trim();
+  const { resolvedSubject } = getTemplatesForSubject(subject, cleanTitle, topics);
 
   // Generate 200 comprehensive questions covering all pages and topics
-  const questions = generateQuestionBank(materialId, cleanTitle, 200);
-  const flashcards = generateFlashcardBank(materialId, 60);
+  const questions = generateQuestionBank(materialId, cleanTitle, 200, subject || resolvedSubject, topics);
+  const flashcards = generateFlashcardBank(materialId, 60, cleanTitle, subject || resolvedSubject, topics);
 
   return {
     materialId,
     title: cleanTitle,
-    subject: subject || "Nutrition and Diet Therapy (NDT)",
+    subject: resolvedSubject,
     questions,
     flashcards,
   };

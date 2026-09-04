@@ -226,6 +226,39 @@ export const subjects: Subject[] = [
       },
     ],
   },
+  {
+    id: "nutrition-diet-therapy",
+    name: "Nutrition and Diet Therapy (NDT)",
+    description: "Clinical nutrition, enteral/parenteral nutrition, therapeutic diets, vitamin deficiencies, and metabolic disorders.",
+    icon: "ShieldPlus",
+    accent: "teal",
+    topics: [
+      {
+        id: "enteral-parenteral-nutrition",
+        name: "Enteral & Parenteral Nutrition (TPN/NG)",
+        description: "Tube feeding safety, residual volume, TPN glucose monitoring, refeeding syndrome.",
+        mastery: 0,
+      },
+      {
+        id: "therapeutic-diets",
+        name: "Therapeutic & Disease-Specific Diets",
+        description: "Renal diets, DASH, Celiac gluten-free (BROW), low-purine, dumping syndrome.",
+        mastery: 0,
+      },
+      {
+        id: "vitamins-electrolytes",
+        name: "Vitamins, Minerals & Nutrient Deficiencies",
+        description: "Fat-soluble vs water-soluble vitamins, scurvy, rickets, pellagra, iron absorption.",
+        mastery: 0,
+      },
+      {
+        id: "clinical-nutrition-counseling",
+        name: "Special Client Populations & Counseling",
+        description: "Infant botulism prevention, PKU diet, burn hypercatabolism, dysphagia safety.",
+        mastery: 0,
+      },
+    ],
+  },
 ];
 
 export const flashcards: Flashcard[] = [

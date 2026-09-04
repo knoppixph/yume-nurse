@@ -22,7 +22,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Select } from "@/components/ui/select";
-import { getSubjectName, getTopicName, quizQuestions, subjects } from "@/lib/study-data";
+import { getSubjectName, getTopicName, subjects } from "@/lib/study-data";
+import { useDynamicStudyData } from "@/lib/use-dynamic-study-data";
 import {
   buildQuizQuestions,
   clearCorrectedMistake,
@@ -71,6 +72,9 @@ function isAnswerCorrect(question: QuizQuestion, selected: string[], textAnswer:
 export function QuizCenter() {
   const [quizState, setQuizState] = useState<QuizState>("config");
 
+  // Dynamic questions and subjects that include uploaded materials from Supabase
+  const { questions: allQuestions, subjects: dynamicSubjects } = useDynamicStudyData();
+
   // Configuration state
   const [subjectId, setSubjectId] = useState("all");
   const [topicId, setTopicId] = useState("all");
@@ -100,18 +104,18 @@ export function QuizCenter() {
     setMistakeBankCount(loadMistakeBankQuestions().length);
   }, [quizState]);
 
-  const currentSubject = subjects.find((s) => s.id === subjectId);
+  const currentSubject = dynamicSubjects.find((s) => s.id === subjectId);
   const availableTopics = currentSubject ? currentSubject.topics : [];
 
   const configuredQuestionsPreview = useMemo(() => {
-    return quizQuestions.filter((q) => {
+    return allQuestions.filter((q) => {
       const matchesSubject = subjectId === "all" || q.subjectId === subjectId;
       const matchesTopic = topicId === "all" || q.topicId === topicId;
       const matchesDifficulty = difficulty === "Mixed" || q.difficulty === difficulty;
       const matchesType = questionType === "all" || q.type === questionType;
       return matchesSubject && matchesTopic && matchesDifficulty && matchesType;
     });
-  }, [difficulty, questionType, subjectId, topicId]);
+  }, [allQuestions, difficulty, questionType, subjectId, topicId]);
 
   const activeQuestion = activeQuestions[activeIndex];
   const currentCorrect = activeQuestion ? isAnswerCorrect(activeQuestion, selected, textAnswer) : false;
@@ -189,7 +193,7 @@ export function QuizCenter() {
       timeLimitSeconds: timeLimitMinutes * 60,
     };
 
-    const questionsToRun = customQuestions ?? buildQuizQuestions(quizQuestions, config);
+    const questionsToRun = customQuestions ?? buildQuizQuestions(allQuestions, config);
     if (!questionsToRun.length) return;
 
     setActiveQuestions(questionsToRun);
@@ -405,7 +409,7 @@ export function QuizCenter() {
                   }}
                 >
                   <option value="all">All Nursing Subjects</option>
-                  {subjects.map((subject) => (
+                  {dynamicSubjects.map((subject) => (
                     <option key={subject.id} value={subject.id}>
                       {subject.name}
                     </option>

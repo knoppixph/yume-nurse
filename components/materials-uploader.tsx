@@ -267,6 +267,14 @@ export function MaterialsManager() {
               }
             }
 
+            if (
+              row.title?.toLowerCase().includes("ndt") ||
+              row.title?.toLowerCase().includes("nutrition") ||
+              row.title?.toLowerCase().includes("diet")
+            ) {
+              matchedSubjectId = "nutrition-diet-therapy";
+            }
+
             const selectedSubject = subjects.find((s) => s.id === matchedSubjectId);
 
             return {

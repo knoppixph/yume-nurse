@@ -20,7 +20,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { Select } from "@/components/ui/select";
-import { flashcards, getSubjectName, getTopicName, subjects } from "@/lib/study-data";
+import { getSubjectName, getTopicName } from "@/lib/study-data";
+import { useDynamicStudyData } from "@/lib/use-dynamic-study-data";
 import {
   calculateSM2,
   formatDueTime,
@@ -37,6 +38,8 @@ import { cn } from "@/lib/utils";
 type StatusFilter = "all" | "due" | "favorites";
 
 export function FlashcardReview() {
+  const { flashcards: allCards, subjects: dynamicSubjects, isLoading: dataLoading } = useDynamicStudyData();
+
   const [subjectId, setSubjectId] = useState("all");
   const [topicId, setTopicId] = useState("all");
   const [difficulty, setDifficulty] = useState("all");
@@ -54,13 +57,13 @@ export function FlashcardReview() {
     setFavorites(loadFavorites());
   }, []);
 
-  const currentSubject = subjects.find((s) => s.id === subjectId);
+  const currentSubject = dynamicSubjects.find((s) => s.id === subjectId);
   const availableTopics = currentSubject ? currentSubject.topics : [];
 
   const filteredCards = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return flashcards.filter((card) => {
+    return allCards.filter((card) => {
       const matchesSubject = subjectId === "all" || card.subjectId === subjectId;
       const matchesTopic = topicId === "all" || card.topicId === topicId;
       const matchesDifficulty = difficulty === "all" || card.difficulty === difficulty;
@@ -92,7 +95,7 @@ export function FlashcardReview() {
         (!normalizedQuery || searchSpace.includes(normalizedQuery))
       );
     });
-  }, [difficulty, favorites, progressMap, query, statusFilter, subjectId, topicId]);
+  }, [allCards, difficulty, favorites, progressMap, query, statusFilter, subjectId, topicId]);
 
   const activeCard = filteredCards[activeIndex] ?? filteredCards[0];
   const cardProgress = activeCard ? progressMap[activeCard.id] : undefined;
@@ -182,8 +185,8 @@ export function FlashcardReview() {
   }, [flipped, handleGrade, nextCard, prevCard, toggleFavorite]);
 
   const dueCount = useMemo(() => {
-    return flashcards.filter((c) => isCardDue(progressMap[c.id])).length;
-  }, [progressMap]);
+    return allCards.filter((c) => isCardDue(progressMap[c.id])).length;
+  }, [allCards, progressMap]);
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -221,7 +224,7 @@ export function FlashcardReview() {
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200",
                   )}
                 >
-                  All ({flashcards.length})
+                  All ({allCards.length})
                 </button>
                 <button
                   type="button"
@@ -268,7 +271,7 @@ export function FlashcardReview() {
                 aria-label="Filter by subject"
               >
                 <option value="all">All Subjects</option>
-                {subjects.map((subject) => (
+                {dynamicSubjects.map((subject) => (
                   <option key={subject.id} value={subject.id}>
                     {subject.name}
                   </option>
