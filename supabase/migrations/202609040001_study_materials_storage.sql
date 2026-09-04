@@ -119,3 +119,40 @@ create policy "Allow owners to delete their files"
     bucket_id = 'study-materials'
     and (storage.foldername(name))[1] = auth.uid()::text
   );
+
+-- Allow authenticated users to update files in study-materials bucket (e.g. app settings)
+drop policy if exists "Allow authenticated updates to study materials" on storage.objects;
+create policy "Allow authenticated updates to study materials"
+  on storage.objects
+  for update
+  to authenticated
+  using (bucket_id = 'study-materials')
+  with check (bucket_id = 'study-materials');
+
+--------------------------------------------------------------------------------
+-- 4. Global App Settings Table (Motivation Notes & Announcements across all accounts)
+--------------------------------------------------------------------------------
+create table if not exists public.app_settings (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id) on delete set null
+);
+
+alter table public.app_settings enable row level security;
+
+drop policy if exists "Anyone can read app_settings" on public.app_settings;
+drop policy if exists "Authenticated users can update app_settings" on public.app_settings;
+
+create policy "Anyone can read app_settings"
+  on public.app_settings
+  for select
+  using (true);
+
+create policy "Authenticated users can update app_settings"
+  on public.app_settings
+  for all
+  to authenticated
+  using (true)
+  with check (true);
+

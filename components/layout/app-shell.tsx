@@ -22,7 +22,7 @@ import { logoutAction } from "@/app/auth/actions";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/client";
 import { loadGamification } from "@/lib/gamification";
-import { loadDailyMessage } from "@/lib/admin-content";
+import { fetchDailyMessage, loadDailyMessage } from "@/lib/admin-content";
 import { cn } from "@/lib/utils";
 
 const studentNavItems = [
@@ -58,9 +58,13 @@ export function AppShell({ children }: AppShellProps) {
     const g = loadGamification();
     setStreak(g.currentStreak);
 
-    // Load custom daily message
+    // Load custom daily message (instant cache first, then cloud sync)
     const msg = loadDailyMessage();
     if (msg?.message) setDailyMsg(msg.message);
+
+    fetchDailyMessage().then((fresh) => {
+      if (fresh?.message) setDailyMsg(fresh.message);
+    });
 
     // Check admin role from Supabase
     async function checkAdmin() {
@@ -69,12 +73,17 @@ export function AppShell({ children }: AppShellProps) {
         const supabase = createClient();
         const { data: authData } = await supabase.auth.getUser();
         if (authData.user) {
+          if (authData.user.email === "juliusalas10@gmail.com") {
+            setIsAdmin(true);
+          }
           const { data: profile } = await supabase
             .from("profiles")
             .select("role")
             .eq("id", authData.user.id)
             .maybeSingle();
-          if (profile?.role === "admin") setIsAdmin(true);
+          if (profile?.role === "admin" || authData.user.email === "juliusalas10@gmail.com") {
+            setIsAdmin(true);
+          }
         }
       } catch {
         // ignore

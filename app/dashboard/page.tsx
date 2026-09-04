@@ -21,7 +21,7 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { Button } from "@/components/ui/button";
 import { dashboardGoal, nextReviewCards, progressSummary } from "@/lib/study-progress";
 import { getSubjectName, getTopicName, subjects, weakTopics } from "@/lib/study-data";
-import { loadDailyMessage, type DailyMotivationMessage } from "@/lib/admin-content";
+import { fetchDailyMessage, loadDailyMessage, type DailyMotivationMessage } from "@/lib/admin-content";
 import { getCurrentLevel, loadGamification, type GamificationState } from "@/lib/gamification";
 import { loadMasteryMap } from "@/lib/user-progress";
 
@@ -32,19 +32,31 @@ export default function DashboardPage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // 1. Load cached instantly to prevent empty flash
     setDailyMsg(loadDailyMessage());
     setGamification(loadGamification());
     setMasteryMap(loadMasteryMap());
-    // Check admin role
+
+    // 2. Fetch latest synced message from Supabase
+    fetchDailyMessage().then((fresh) => {
+      setDailyMsg(fresh);
+    });
+
+    // 3. Check admin role
     import("@/lib/supabase/config").then(({ isSupabaseConfigured }) => {
       if (!isSupabaseConfigured()) return;
       import("@/lib/supabase/client").then(({ createClient }) => {
         const sb = createClient();
         sb.auth.getUser().then(({ data }) => {
           if (data.user) {
+            if (data.user.email === "juliusalas10@gmail.com") {
+              setIsAdmin(true);
+            }
             sb.from("profiles").select("role").eq("id", data.user.id).maybeSingle()
               .then(({ data: profile }) => {
-                if (profile?.role === "admin") setIsAdmin(true);
+                if (profile?.role === "admin" || data.user.email === "juliusalas10@gmail.com") {
+                  setIsAdmin(true);
+                }
               });
           }
         });
