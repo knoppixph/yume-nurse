@@ -256,16 +256,27 @@ export function MaterialsManager() {
               console.warn("Storage lookup warning:", storageErr);
             }
 
-            const selectedSubject = subjects.find((s) => s.id === row.subject_id);
+            // Extract subject ID if tagged in summary
+            let matchedSubjectId = row.subject_id;
+            let displayTopics = row.summary ?? "Custom nursing study notes and clinical reference material.";
+            if (row.summary?.startsWith("[Subject:")) {
+              const match = row.summary.match(/^\[Subject:([^\]]+)\]\s*([\s\S]*)$/);
+              if (match) {
+                if (!matchedSubjectId) matchedSubjectId = match[1];
+                displayTopics = match[2] || "Custom nursing study notes and clinical reference material.";
+              }
+            }
+
+            const selectedSubject = subjects.find((s) => s.id === matchedSubjectId);
 
             return {
               id: row.id,
               title: row.title,
               filename: row.file_name,
-              source: row.summary ?? "Uploaded Nursing Material",
+              source: displayTopics,
               subject: selectedSubject?.name ?? "General Nursing",
-              subjectId: row.subject_id ?? "fundamentals",
-              topics: row.summary ?? "Custom nursing study notes and clinical reference material.",
+              subjectId: matchedSubjectId ?? "fundamentals",
+              topics: displayTopics,
               dateAdded: new Date(row.created_at).toLocaleDateString("en-PH", {
                 month: "short",
                 day: "numeric",
@@ -404,20 +415,39 @@ export function MaterialsManager() {
         return;
       }
 
+      // Verify if subjectId exists in the database subjects table to avoid foreign key errors
+      let validSubjectId: string | null = null;
+      if (subjectId) {
+        try {
+          const { data: dbSub } = await (supabase as any)
+            .from("subjects")
+            .select("id")
+            .eq("id", subjectId)
+            .maybeSingle();
+          if (dbSub?.id) {
+            validSubjectId = dbSub.id;
+          }
+        } catch {
+          validSubjectId = null;
+        }
+      }
+
+      const summaryWithSubject = `[Subject:${subjectId}] ${topics.trim() || source.trim() || ""}`;
+
       // 2. Insert into study_materials table with visibility: 'public' so all accounts see it
       const { data: row, error: dbError } = await supabase
         .from("study_materials")
         .insert({
           owner_id: user.id,
           uploaded_by: user.id,
-          subject_id: subjectId || null,
+          subject_id: validSubjectId,
           title: title.trim(),
           file_name: selectedFile.name,
           storage_bucket: "study-materials",
           storage_path: storagePath,
           mime_type: selectedFile.type || "application/octet-stream",
           file_size_bytes: selectedFile.size,
-          summary: topics.trim() || source.trim() || null,
+          summary: summaryWithSubject,
           visibility: "public",
         })
         .select()

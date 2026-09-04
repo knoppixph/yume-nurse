@@ -21,6 +21,27 @@ values (
 on conflict (id) do update set public = true;
 
 --------------------------------------------------------------------------------
+-- 1b. Seed standard nursing subjects so foreign key constraints succeed
+--------------------------------------------------------------------------------
+insert into public.subjects (id, name, description, icon, accent, sort_order)
+values
+  ('community-health-ph', 'Community Health Nursing (Philippines)', 'Public health nursing in the Philippines, Primary Health Care (LOI 949), 8 PHC elements, 4 A''s, BHW empowerment, and healthcare delivery levels.', 'Users', 'emerald', 5),
+  ('fundamentals', 'Fundamentals of Nursing', 'Core bedside skills, safety habits, assessment basics, and the nursing process.', 'HeartPulse', 'pink', 10),
+  ('anatomy-physiology', 'Anatomy and Physiology', 'Body systems, normal function, and clinically relevant relationships.', 'Activity', 'blue', 20),
+  ('pharmacology', 'Pharmacology', 'Medication safety, classifications, dosage thinking, and nursing responsibilities.', 'Pill', 'purple', 30),
+  ('medical-surgical', 'Medical-Surgical Nursing', 'Adult health conditions, priority assessment, and clinical decision-making.', 'Stethoscope', 'teal', 40),
+  ('maternal-child', 'Maternal and Child Nursing', 'Pregnancy, newborn care, postpartum assessment, and family-centered teaching.', 'Baby', 'rose', 50),
+  ('psychiatric', 'Psychiatric Nursing', 'Therapeutic communication, mental health assessment, crisis care, and safety.', 'Brain', 'amber', 60)
+on conflict (id) do update
+set
+  name = excluded.name,
+  description = excluded.description,
+  icon = excluded.icon,
+  accent = excluded.accent,
+  sort_order = excluded.sort_order,
+  updated_at = now();
+
+--------------------------------------------------------------------------------
 -- 2. Fix RLS policies on public.study_materials table
 --------------------------------------------------------------------------------
 drop policy if exists "Users can view their own materials or public/admin library" on public.study_materials;
