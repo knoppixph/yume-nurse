@@ -25,7 +25,7 @@ on conflict (id) do update set public = true;
 --------------------------------------------------------------------------------
 insert into public.subjects (id, name, description, icon, accent, sort_order)
 values
-  ('community-health-ph', 'Community Health Nursing (Philippines)', 'Public health nursing in the Philippines, Primary Health Care (LOI 949), 8 PHC elements, 4 A''s, BHW empowerment, and healthcare delivery levels.', 'Users', 'emerald', 5),
+  ('community-health-ph', 'Community Health Nursing (Philippines)', 'Public health nursing in the Philippines, Primary Health Care (LOI 949), 8 PHC elements, 4 A''s, BHW empowerment, and healthcare delivery levels.', 'Users', 'teal', 5),
   ('fundamentals', 'Fundamentals of Nursing', 'Core bedside skills, safety habits, assessment basics, and the nursing process.', 'HeartPulse', 'pink', 10),
   ('anatomy-physiology', 'Anatomy and Physiology', 'Body systems, normal function, and clinically relevant relationships.', 'Activity', 'blue', 20),
   ('pharmacology', 'Pharmacology', 'Medication safety, classifications, dosage thinking, and nursing responsibilities.', 'Pill', 'purple', 30),
